@@ -1,25 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import SignupForm from './components/SignupForm';
+import LoginForm from './components/LoginForm';
+import Home from './components/Home';
+import BoardList from './components/BoardList';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit11111111111111111111 <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    return (
+        <div className="App">
+            <h1>회원가입 및 로그인</h1>
+            {isLoggedIn ? (
+                <>
+                    <Home setIsLoggedIn={setIsLoggedIn} />
+                    <BoardList />
+                </>
+            ) : (
+                <>
+                    <SignupForm />
+                    <LoginForm setIsLoggedIn={setIsLoggedIn} />
+                </>
+            )}
+        </div>
+    );
 }
 
 export default App;
