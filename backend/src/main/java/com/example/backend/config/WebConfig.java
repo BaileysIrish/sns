@@ -25,6 +25,9 @@ public class WebConfig {
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 registry.addResourceHandler("/images/**")
                         .addResourceLocations("C:\\study\\sns\\backend\\src\\profileImage");
+
+                registry.addResourceHandler("/content-files/**")
+                        .addResourceLocations("file:C:/study/sns/backend/src/contentImage/");
             }
         };
     }

@@ -21,6 +21,9 @@ public class Board {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "content_image", columnDefinition = "TEXT")
+    private String contentImage;
+
     @Column(nullable = false)
     private LocalDateTime writeDatetime;
 
