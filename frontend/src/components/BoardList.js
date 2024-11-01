@@ -21,6 +21,15 @@ function BoardList() {
                         <h3>{post.title}</h3>
                         <p>{post.content}</p>
                         <span>조회수: {post.viewCount}</span>
+                        {post.contentImage && (
+                            <div>
+                                <img
+                                    src={post.contentImage}
+                                    alt="게시물 이미지"
+                                    style={{ maxWidth: '100%', height: 'auto' }}
+                                />
+                            </div>
+                        )}
                     </li>
                 ))}
             </ul>

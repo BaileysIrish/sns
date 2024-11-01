@@ -35,10 +35,13 @@ export const logout = async () => {
 
 
 export const createPost = async (postData) => {
-    const response = await axios.post("http://localhost:8080/api/board/create", postData);
+    const response = await axios.post("http://localhost:8080/api/board/create", postData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
     return response.data;
 };
-
 export const getPosts = async () => {
     const response = await axios.get("http://localhost:8080/api/board/posts");
     return response.data;
