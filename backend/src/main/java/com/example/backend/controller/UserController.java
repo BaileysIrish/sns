@@ -72,11 +72,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
         User user = userService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
         if (user != null) {
             session.setAttribute("user", user);  // 세션에 사용자 정보를 저장
-            return ResponseEntity.ok("로그인 성공");
+
+            // 이메일을 응답으로 반환하여 프론트엔드에서 사용할 수 있도록 함
+            return ResponseEntity.ok(user.getEmail());
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: 이메일 또는 비밀번호 오류");
         }

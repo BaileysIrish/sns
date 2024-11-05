@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 public class Board {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int boardNumber;
@@ -20,9 +21,6 @@ public class Board {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
-
-    @Column(name = "content_image", columnDefinition = "TEXT")
-    private String contentImage;
 
     @Column(nullable = false)
     private LocalDateTime writeDatetime;
@@ -39,5 +37,6 @@ public class Board {
     @Column(nullable = false, length = 50)
     private String email;
 
-
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardFile> files = new ArrayList<>(); // 기본값으로 빈 리스트 초기화
 }
