@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { BsList } from "react-icons/bs";
 import { sidebarMenu } from "./SidebarConfig";
 import { useNavigate } from "react-router-dom";
+import CreatePost from "../Post/CreatePost";
 
 export default function Sidebar() {
   const [activeTab, setActiveTab] = useState();
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const handleTabClick = (title) => {
     setActiveTab(title);
@@ -12,6 +14,8 @@ export default function Sidebar() {
       navigate("/username");
     } else if (title === "홈") {
       navigate("/");
+    } else if (title === "만들기") {
+      setOpen(true);
     }
   };
   return (
@@ -50,6 +54,8 @@ export default function Sidebar() {
           <p className="ml-5">더 보기</p>
         </div>
       </div>
+
+      <CreatePost open={open} setOpen={setOpen} />
     </div>
   );
 }
