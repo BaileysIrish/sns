@@ -14,6 +14,7 @@ export default function Sidebar() {
       navigate("/username");
     } else if (title === "홈") {
       navigate("/");
+      window.scrollTo(0, 0);
     } else if (title === "만들기") {
       setOpen(true);
     }
@@ -34,9 +35,11 @@ export default function Sidebar() {
             {sidebarMenu.map((item) => (
               <div
                 onClick={() => handleTabClick(item.title)}
-                className="flex items-center mb-7 cursor-pointer text-base"
+                className="flex items-center cursor-pointer p-3 text-base hover:bg-gray-100 duration-500 rounded-lg transition-all ease-out group"
               >
-                {activeTab === item.title ? item.activeIcon : item.icon}
+                <span className="transition-transform duration-200 group-hover:scale-110">
+                  {activeTab === item.title ? item.activeIcon : item.icon}
+                </span>
                 <p
                   className={`${
                     activeTab === item.title ? "font-semibold" : "font-normal"

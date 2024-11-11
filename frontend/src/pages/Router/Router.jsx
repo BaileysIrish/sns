@@ -3,6 +3,8 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "../HomePage/HomePage";
 import Profile from "../Profile/Profile";
+import Story from "../Story/Story";
+import { ScrollTop } from "./ScrollToTop";
 
 export default function Router() {
   return (
@@ -12,9 +14,11 @@ export default function Router() {
           <Sidebar />
         </div>
         <div className="w-full">
+          <ScrollTop />
           <Routes>
             <Route path="/" element={<HomePage />}></Route>
             <Route path="/username" element={<Profile />}></Route>
+            <Route path="/stories" element={<Story />}></Route>
           </Routes>
         </div>
       </div>

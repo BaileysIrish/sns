@@ -5,20 +5,20 @@ import { PiUserRectangleLight } from "react-icons/pi";
 import ReqUserPostCard from "./ReqUserPostCard";
 
 export default function ReqUserPost() {
-  const [activeTab, setActiveTab] = useState();
+  const [activeTab, setActiveTab] = useState("게시물");
   const tabs = [
-    { tab: "게시물", icon: <AiOutlineTable />, activeTab: "" },
+    { tab: "게시물", icon: <AiOutlineTable /> },
     { tab: "저장됨", icon: <CgBookmark /> },
     { tab: "태그됨", icon: <PiUserRectangleLight /> },
   ];
   return (
     <div>
-      <div className="flex space-x-14 border-t relative ">
+      <div className="flex space-x-14 border-t">
         {tabs.map((item) => (
           <div
             onClick={() => setActiveTab(item.tab)}
             className={`${
-              activeTab === item.tab ? "border-t border-black" : "opacity-60"
+              activeTab === item.tab ? "border-t border-black" : "text-gray-600"
             } flex items-center cursor-pointer py-2 text-sm`}
           >
             <p>{item.icon}</p>

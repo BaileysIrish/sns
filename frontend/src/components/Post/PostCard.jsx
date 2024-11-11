@@ -99,13 +99,13 @@ export default function PostCard() {
           <p>10명이 좋아합니다</p>
           <p
             onClick={() => setOpen(true)}
-            className="text-gray-400 py-2 cursor-pointer"
+            className="text-gray-400 py-1 cursor-pointer"
           >
             댓글 131개 모두 보기
           </p>
         </div>
         <div className="border-b w-full">
-          <div className="flex w-full items-center justify-between px-2 py-2">
+          <div className="flex w-full items-center justify-between px-2 pb-2">
             <input
               className="commentInput"
               type="text"

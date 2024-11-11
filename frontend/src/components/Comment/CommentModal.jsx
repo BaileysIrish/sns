@@ -44,11 +44,11 @@ export default function CommentModal({
           size="lg"
           onClick={() => setOpen(false)}
         /> */}
-        <DrawerBody>
+        <DrawerBody className="p-0">
           <div className="flex h-[93vh]">
             <div className="w-[96%] flex flex-col justify-center">
               <img
-                className="max-h-full w-full object-cover block"
+                className="h-full w-full object-cover block"
                 src="https://cdn.pixabay.com/photo/2023/12/13/14/01/woman-8446980_640.png"
                 alt=""
               />
