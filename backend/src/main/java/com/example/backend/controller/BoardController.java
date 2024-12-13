@@ -70,24 +70,41 @@ public class BoardController {
         return ResponseEntity.ok(boardDtos);
     }
 
-    @GetMapping("/posts/{id}")
-    public ResponseEntity<BoardDto> getPostById(@PathVariable int id) {
-        Board board = boardService.getPostById(id);
+    @GetMapping("/posts/{boardNumber}")
+    public ResponseEntity<BoardDto> getPostById(@PathVariable int boardNumber) {
+        Board board = boardService.getPostById(boardNumber);
         if (board == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(convertToDto(board));
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<BoardDto> updatePost(@RequestBody Board board) {
+    @PutMapping("/update/{boardNumber}")
+    public ResponseEntity<BoardDto> updatePost(
+            @PathVariable int boardNumber,
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+
+        // 게시물 수정
+        Board board = new Board();
+        board.setBoardNumber(boardNumber);
+        board.setTitle(title);
+        board.setContent(content);
+
         Board updatedBoard = boardService.updatePost(board);
+
+        // 파일 처리
+        if (files != null && !files.isEmpty()) {
+            saveFiles(files, updatedBoard);
+        }
+
         return ResponseEntity.ok(convertToDto(updatedBoard));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable int id) {
-        boardService.deletePost(id);
+    @DeleteMapping("/delete/{boardNumber}")
+    public ResponseEntity<Void> deletePost(@PathVariable int boardNumber) {
+        boardService.deletePost(boardNumber);
         return ResponseEntity.ok().build();
     }
 
@@ -135,6 +152,7 @@ public class BoardController {
         boardDto.setBoardNumber(board.getBoardNumber());
         boardDto.setTitle(board.getTitle());
         boardDto.setContent(board.getContent());
+        boardDto.setEmail(board.getEmail());
         boardDto.setFiles(board.getFiles().stream().map(file -> {
             BoardFileDto fileDto = new BoardFileDto();
             fileDto.setFilePath(file.getFilePath());

@@ -3,45 +3,48 @@ package com.example.backend.service;
 import com.example.backend.model.Board;
 import com.example.backend.model.Like;
 import com.example.backend.model.User;
-import com.example.backend.repository.LikeRepository;
 import com.example.backend.repository.BoardRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.backend.repository.LikeRepository;
+import com.example.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class LikeService {
 
-    @Autowired
-    private LikeRepository likeRepository;
+    private final LikeRepository likeRepository;
+    private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private BoardRepository boardRepository;
-
-    @Transactional
-    public void toggleLike(Board board, User user) {
-        likeRepository.findByBoardAndUser(board, user).ifPresentOrElse(
-                existingLike -> {
-                    // If a like exists, remove it (unlike)
-                    likeRepository.deleteByBoardAndUser(board, user);
-                    // Decrease favorite count on board
-                    board.setFavoriteCount(board.getFavoriteCount() - 1);
-                },
-                () -> {
-                    // If no like exists, add a new like
-                    Like like = new Like();
-                    like.setBoard(board);
-                    like.setUser(user);
-                    likeRepository.save(like);
-                    // Increase favorite count on board
-                    board.setFavoriteCount(board.getFavoriteCount() + 1);
-                }
-        );
-        // Save the updated board entity with the new favorite count
-        boardRepository.save(board);
+    public LikeService(LikeRepository likeRepository, BoardRepository boardRepository, UserRepository userRepository) {
+        this.likeRepository = likeRepository;
+        this.boardRepository = boardRepository;
+        this.userRepository = userRepository;
     }
 
-    public int getLikeCount(Board board) { // int로 수정
-        return likeRepository.countByBoard(board); // int로 수정
+    public int toggleLike(String email, int boardNumber) {
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        Board board = boardRepository.findById(boardNumber)
+                .orElseThrow(() -> new IllegalArgumentException("Board not found."));
+        Optional<Like> existingLike = likeRepository.findByUserAndBoard(user, board);
+
+        if (existingLike.isPresent()) {
+            likeRepository.delete(existingLike.get());
+        } else {
+            Like like = new Like();
+            like.setUser(user);
+            like.setBoard(board);
+            likeRepository.save(like);
+        }
+
+        return likeRepository.countByBoard(board);
+    }
+
+    public int getLikeCount(int boardNumber) {
+        Board board = boardRepository.findById(boardNumber)
+                .orElseThrow(() -> new IllegalArgumentException("Board not found."));
+        return likeRepository.countByBoard(board);
     }
 }
