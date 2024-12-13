@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../api/userApi';
-import BoardList from './BoardList'; // BoardList 컴포넌트 가져오기
+import BoardList from './BoardList';
 
 function Home({ setIsLoggedIn }) {
     const navigate = useNavigate();
@@ -9,7 +9,7 @@ function Home({ setIsLoggedIn }) {
     const handleLogout = async () => {
         try {
             await logout();
-            setIsLoggedIn(false); // 로그인 상태 해제
+            setIsLoggedIn(false);
             alert("로그아웃 성공");
         } catch (error) {
             alert("로그아웃에 실패했습니다.");
@@ -17,7 +17,11 @@ function Home({ setIsLoggedIn }) {
     };
 
     const goToCreatePost = () => {
-        navigate("/create-post"); // 게시물 작성 페이지로 이동
+        navigate("/create-post");
+    };
+
+    const goToEditPost = (postId) => {
+        navigate(`/edit-post/${postId}`);
     };
 
     return (
@@ -26,8 +30,8 @@ function Home({ setIsLoggedIn }) {
             <button onClick={handleLogout}>로그아웃</button>
             <button onClick={goToCreatePost}>게시물 작성</button>
 
-            {/* 작성된 게시물 목록 표시 */}
-            <BoardList />
+            {/* 게시물 목록 표시 */}
+            <BoardList onEditPost={goToEditPost} />
         </div>
     );
 }

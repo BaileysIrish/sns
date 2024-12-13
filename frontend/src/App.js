@@ -5,6 +5,7 @@ import LoginForm from './components/LoginForm';
 import Home from './components/Home';
 import BoardList from './components/BoardList';
 import CreatePost from './components/CreatePost';
+import EditPost from './components/EditPost'; // 수정 페이지 추가
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,7 +18,8 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Home setIsLoggedIn={setIsLoggedIn} />} />
                         <Route path="/board" element={<BoardList />} />
-                        <Route path="/create-post" element={<CreatePost />} /> {/* 게시물 작성 경로 추가 */}
+                        <Route path="/create-post" element={<CreatePost />} />
+                        <Route path="/edit-post/:postId" element={<EditPost />} /> {/* 수정 페이지 경로 추가 */}
                     </Routes>
                 ) : (
                     <>
