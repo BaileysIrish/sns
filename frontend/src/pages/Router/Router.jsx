@@ -10,7 +10,7 @@ export default function Router() {
   return (
     <div>
       <div className="flex">
-        <div className="w-[20%] border border-l-slate-500">
+        <div className="w-[22%]">
           <Sidebar />
         </div>
         <div className="w-full">
