@@ -7,16 +7,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "likes")
-public class Like {
+@Table(name = "comment_likes")
+public class CommentLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_number", nullable = false)
-    private Board board;
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "email", nullable = false)

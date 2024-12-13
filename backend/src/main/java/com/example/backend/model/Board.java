@@ -12,10 +12,12 @@ import java.util.List;
 @Getter
 @Setter
 public class Board {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int boardNumber;
+
+    @Column(nullable = false)
+    private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -29,8 +31,15 @@ public class Board {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int commentCount;
 
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int viewCount;
+
     @Column(nullable = false, length = 50)
     private String email;
 
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardFile> files = new ArrayList<>(); // 기본값으로 빈 리스트 초기화
 
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 }

@@ -1,13 +1,12 @@
 package com.example.backend.model;
 
 
-import com.example.backend.dto.UserDto;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.*;
-
-import java.util.HashSet;
 
 @Entity
 @Table(name = "user")
@@ -29,11 +28,5 @@ public class User {
 
     @Column(name = "profile_image", columnDefinition = "TEXT")
     private String profileImage;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Follow> followers = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Story> stories = new ArrayList<>();
 }
 
