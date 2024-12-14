@@ -5,6 +5,7 @@ import com.example.backend.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -26,9 +27,12 @@ public class CommentController {
 
     // 특정 게시글의 댓글 조회
     @GetMapping("/{boardId}")
-    public ResponseEntity<List<Comment>> getCommentsByBoardId(@PathVariable int boardId) {
+    public ResponseEntity<List<Comment>> getCommentsByBoardId(@PathVariable Integer boardId) {
+        if (boardId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         List<Comment> comments = commentService.getCommentsByBoardId(boardId);
-        return ResponseEntity.ok(comments);
+        return ResponseEntity.ok(comments != null ? comments : Collections.emptyList());
     }
 
     // 새로운: 매개변수가 없는 경우 처리 (GET /api/comments)
