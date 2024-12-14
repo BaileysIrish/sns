@@ -1,0 +1,18 @@
+.searchtab {
+  width: 400px;
+  box-shadow: 5px 0 15px rgba(71, 71, 71, 0.212);
+  border-radius: 0 13px 13px 0;
+}
+
+.sidebarText {
+  white-space: nowrap;
+  overflow: hidden;
+  visibility: visible;
+  height: auto;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.sidebarText.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
