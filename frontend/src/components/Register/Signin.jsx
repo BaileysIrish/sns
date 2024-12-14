@@ -25,6 +25,7 @@ export default function Signin() {
       // 서버로 로그인 요청
       const response = await login(values);
       console.log("Login successful:", response);
+      sessionStorage.setItem("userEmail", response); // sessionStorage 저장
 
       // 로그인 성공 시 대시보드로 이동
       navigate("/"); // 홈으로 이동

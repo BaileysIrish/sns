@@ -25,18 +25,6 @@ export const login = async (userData) => {
       userData,
       { withCredentials: true }
     );
-    const { userEmail, token } = response.data; // 서버에서 반환된 이메일
-    if (userEmail) {
-      console.log("User email saved to localStorage:", userEmail); // 콘솔 로그로 이메일 확인
-      sessionStorage.setItem("userEmail", userEmail); // sessionStorage 저장
-
-      // 필요 시 토큰 저장
-      if (token) {
-        sessionStorage.setItem("authToken", token);
-      }
-    } else {
-      console.error("Login response does not contain email");
-    }
 
     return response.data;
   } catch (error) {
