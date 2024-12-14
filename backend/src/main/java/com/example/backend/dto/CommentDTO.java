@@ -13,4 +13,10 @@ public class CommentDTO {
     private String authorEmail;
     private LocalDateTime createdAt;
 
+    public CommentDTO(int id, String content, String authorEmail, LocalDateTime createdAt) {
+        this.id = id;
+        this.content = content;
+        this.authorEmail = authorEmail;
+        this.createdAt = createdAt;
+    }
 }
