@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "./Auth.css";
-import { motion, AnimatePresence } from "framer-motion";
 import Signin from "../../components/Register/Signin";
 import { useLocation } from "react-router-dom";
 import Signup from "../../components/Register/Signup";

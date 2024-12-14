@@ -1,8 +1,9 @@
 import { Box, Button, Input, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { Field, Formik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../api/auth";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -14,10 +15,28 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function Signin() {
+  const [serverError, setServerError] = useState("");
   const initialValues = { email: "", password: "" };
   const navigate = useNavigate();
-  const handleSubmit = (values) => {
-    console.log("values: ", values);
+
+  const handleSubmit = async (values, { setSubmitting }) => {
+    setServerError(""); // 서버 에러 초기화
+    try {
+      // 서버로 로그인 요청
+      const response = await login(values);
+      console.log("Login successful:", response);
+
+      // 로그인 성공 시 대시보드로 이동
+      navigate("/"); // 홈으로 이동
+    } catch (error) {
+      // 서버 에러 처리
+      setServerError(
+        error.response?.data?.message || "An unexpected error occurred"
+      );
+      console.error("Login failed:", error);
+    } finally {
+      setSubmitting(false); // 폼 제출 상태 리셋
+    }
   };
 
   const handleNavigate = () => navigate("/signup");
@@ -38,7 +57,7 @@ export default function Signin() {
             onSubmit={handleSubmit}
             validationSchema={validationSchema}
           >
-            {({ handleSubmit, errors, touched }) => (
+            {({ handleSubmit, errors, touched, isSubmitting }) => (
               <form onSubmit={handleSubmit} style={{ width: "100%" }}>
                 {/* Email Field */}
                 <Box mb={4} mt={4}>
@@ -87,12 +106,23 @@ export default function Signin() {
                   </Field>
                 </Box>
 
+                {/* Server Error Message */}
+                {serverError && (
+                  <Box mb={4}>
+                    <Text color="red.500" fontSize="sm">
+                      {serverError}
+                    </Text>
+                  </Box>
+                )}
+
                 {/* Submit Button */}
                 <Box mt={4}>
                   <Button
                     type="submit"
-                    colorScheme={"blue"}
-                    width={"100%"}
+                    colorScheme="blue"
+                    width="100%"
+                    size="lg"
+                    isLoading={isSubmitting} // 제출 중 로딩 상태
                     className="border"
                   >
                     Sign In
@@ -121,6 +151,7 @@ export default function Signin() {
                     width={"100%"}
                     className="border"
                     onClick={handleNavigate}
+                    isDisabled={isSubmitting} // 제출 중 클릭 방지
                   >
                     Sign Up
                   </Button>
