@@ -14,7 +14,7 @@ import { toggleLike, getLikeCount } from "../../api/likes";
 import { getCommentsByBoardId } from "../../api/comments";
 
 export default function PostCard({ post }) {
-  const { title, content, boardNumber, files } = post;
+  const { title, email, content, boardNumber, files } = post;
   const [showDropDown, setShowDropDown] = useState(false);
   const [isPostLiked, setIsPostLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -80,8 +80,8 @@ export default function PostCard({ post }) {
               alt=""
             />
             <div className="pl-2">
-              <p className="font-semibold text-sm">username</p>
-              <p className="font-thin text-sm">location</p>
+              <p className="font-semibold text-sm">{title}</p>
+              <p className="font-thin text-sm">{email}</p>
             </div>
           </div>
           <div>
@@ -115,6 +115,7 @@ export default function PostCard({ post }) {
               첨부된 파일이 없습니다.
             </p>
           )}
+          <div className="m-5">{content}</div>
         </div>
         <div className="flex justify-between items-center w-full px-1 py-4">
           <div className="flex items-center space-x-4">
@@ -177,6 +178,7 @@ export default function PostCard({ post }) {
         isSaved={isSaved}
         open={open}
         setOpen={setOpen}
+        boardNumber={boardNumber}
       />
     </li>
   );

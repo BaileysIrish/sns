@@ -6,7 +6,7 @@ import {
   DrawerRoot,
 } from "@chakra-ui/react";
 import { CloseButton } from "../ui/close-button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BsBookmark,
   BsBookmarkFill,
@@ -18,6 +18,7 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline } from "react-icons/io5";
 import "./CommentModal.css";
+import { getCommentsByBoardId } from "../../api/comments";
 
 export default function CommentModal({
   isSaved,
@@ -26,7 +27,26 @@ export default function CommentModal({
   handleSavePost,
   open,
   setOpen,
+  boardNumber
 }) {
+  const [comments, setComments] = useState([])
+  
+  useEffect(() => {
+    if(!boardNumber)
+      return;
+
+    const fetchPosts = async () => {
+      try {
+         const data = await getCommentsByBoardId(boardNumber); // API 호출
+         setComments(data); // 데이터 상태에 저장
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
     <DrawerRoot size={"2xl"} open={open} onOpenChange={(e) => setOpen(e.open)}>
       <DrawerBackdrop />
@@ -71,10 +91,8 @@ export default function CommentModal({
               </div>
               <hr />
               <div className="comment">
-                {Array(20)
-                  .fill(1)
-                  .map((item) => (
-                    <CommentTotal />
+                {comments?.map((item) => (
+                    <CommentTotal comment={item}/>
                   ))}
               </div>
 

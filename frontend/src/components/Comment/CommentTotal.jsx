@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-export default function CommentTotal() {
+export default function CommentTotal({comment}) {
   const [isCommentLiked, setIsCommentLiked] = useState();
   const handleLikeComment = () => {
     setIsCommentLiked(!isCommentLiked);
@@ -19,12 +19,12 @@ export default function CommentTotal() {
           </div>
           <div className="ml-3">
             <p>
-              <span className="font-semibold">username</span>
-              <span className="ml-2">good!</span>
+              <span className="font-semibold">{comment?.authorEmail}</span>
+              <span className="ml-2">{comment?.content}</span>
             </p>
             <div className="flex items-center space-x-3 text-xs opacity-60 pt-1">
-              <span>1분전</span>
-              <span>좋아요 23개</span>
+              <span>{comment?.createdAt}</span>
+              {/* <span>좋아요 {comment?.}개</span> */}
             </div>
           </div>
         </div>
