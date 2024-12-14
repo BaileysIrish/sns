@@ -18,7 +18,7 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline } from "react-icons/io5";
 import "./CommentModal.css";
-import { getCommentsByBoardId } from "../../api/comments";
+import { createComment, getCommentsByBoardId } from "../../api/comments";
 
 export default function CommentModal({
   isSaved,
@@ -30,7 +30,16 @@ export default function CommentModal({
   boardNumber
 }) {
   const [comments, setComments] = useState([])
-  
+  const [newComment, setNewComment] = useState('')
+
+  const fetchNewComment = async ()=>{
+      try {
+        await createComment(newComment);
+      } catch (error) {
+        console.error("좋아요 개수 불러오기 실패:", error);
+      }
+    }
+
   useEffect(() => {
     if(!boardNumber)
       return;
@@ -140,6 +149,13 @@ export default function CommentModal({
                       className="commentInputs"
                       type="text"
                       placeholder="댓글 달기..."
+                      value={newComment}
+                      onChange={(e)=>{setNewComment(e.target.value)}}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          fetchNewComment()
+                        }
+                      }}
                     />
                   </div>
                 </div>

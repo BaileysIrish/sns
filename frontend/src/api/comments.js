@@ -2,8 +2,13 @@ import axios from "axios";
 
 export const createComment = async (commentData) => {
   const response = await axios.post(
-    "http://localhost:8080/api/comments",
-    commentData
+    "http://localhost:8080/api/comments", 
+    commentData, 
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
   );
   return response.data;
 };

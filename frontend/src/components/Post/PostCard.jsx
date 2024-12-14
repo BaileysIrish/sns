@@ -11,7 +11,7 @@ import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline } from "react-icons/io5";
 import CommentModal from "../Comment/CommentModal";
 import { toggleLike, getLikeCount } from "../../api/likes";
-import { getCommentsByBoardId } from "../../api/comments";
+import { createComment, getCommentsByBoardId } from "../../api/comments";
 
 export default function PostCard({ post }) {
   const { title, email, content, boardNumber, files } = post;
@@ -21,7 +21,16 @@ export default function PostCard({ post }) {
   const [commentCount, setCommentCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [open, setOpen] = useState(false);
+  const [newComment, setNewComment] = useState('')
 
+  const fetchNewComment = async ()=>{
+    try {
+      await createComment(newComment);
+    } catch (error) {
+      console.error("좋아요 개수 불러오기 실패:", error);
+    }
+  }
+  
   // 좋아요 개수 불러오기
   useEffect(() => {
     const fetchLikeCount = async () => {
@@ -166,6 +175,13 @@ export default function PostCard({ post }) {
               className="commentInput"
               type="text"
               placeholder="댓글 달기..."
+              value={newComment}
+              onChange={(e)=>{setNewComment(e.target.value)}}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchNewComment()
+                }
+              }}
             />
             <BsEmojiSmile />
           </div>
