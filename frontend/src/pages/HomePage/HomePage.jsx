@@ -29,7 +29,7 @@ export default function HomePage() {
             ))}
           </div>
           <ul className="space-y-10 w-full mt-10">
-            {[1, 1].map((post) => (
+            {posts?.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </ul>
