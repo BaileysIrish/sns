@@ -1,64 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import {
-    getPosts,
-    toggleLike,
-    getLikeCount,
-    createComment,
-    getCommentsByBoardId,
-    toggleCommentLike,
-    getCommentLikeCount,
-    deletePost,
-} from '../api/userApi';
+import { getPosts, toggleLike, getLikeCount, deletePost } from '../api/userApi';
 import { useNavigate } from 'react-router-dom';
+import Comment from './Comment'; // Comment.js 파일 import
 
 function BoardList() {
-    const [posts, setPosts] = useState([]); // 게시글 상태
-    const [loading, setLoading] = useState(true); // 로딩 상태
-    const [error, setError] = useState(null); // 에러 상태
-    const [likeCounts, setLikeCounts] = useState({}); // 좋아요 상태
-    const [comments, setComments] = useState({}); // 댓글 상태
-    const [newComment, setNewComment] = useState({}); // 새 댓글 입력 상태
-    const [commentLikes, setCommentLikes] = useState({}); // 댓글 좋아요 상태
-    const userEmail = localStorage.getItem('userEmail'); // 로컬 스토리지에서 사용자 이메일 가져오기
-    const navigate = useNavigate(); // 페이지 이동을 위한 hook
+    const [posts, setPosts] = useState([]);
+    const [likeCounts, setLikeCounts] = useState({});
+    const userEmail = localStorage.getItem('userEmail');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchPostsAndComments = async () => {
+        const fetchPosts = async () => {
             try {
-                const postsData = await getPosts(); // 게시글 데이터 가져오기
+                const postsData = await getPosts();
                 const likeCountsData = {};
-                const commentsData = {};
-                const commentLikesData = {};
 
-                // 게시글별 좋아요와 댓글 데이터 가져오기
                 await Promise.all(
                     postsData.map(async (post) => {
                         likeCountsData[post.boardNumber] = await getLikeCount(post.boardNumber);
-                        commentsData[post.boardNumber] = await getCommentsByBoardId(post.boardNumber);
-
-                        // 댓글별 좋아요 데이터 가져오기
-                        const postComments = commentsData[post.boardNumber] || [];
-                        await Promise.all(
-                            postComments.map(async (comment) => {
-                                commentLikesData[comment.id] = await getCommentLikeCount(comment.id);
-                            })
-                        );
                     })
                 );
 
                 setPosts(postsData);
                 setLikeCounts(likeCountsData);
-                setComments(commentsData);
-                setCommentLikes(commentLikesData);
-            } catch (err) {
-                console.error("Error fetching posts or comments:", err);
-                setError("게시글 데이터를 불러오는 중 오류가 발생했습니다.");
-            } finally {
-                setLoading(false); // 로딩 종료
+            } catch (error) {
+                console.error("게시글 데이터를 불러오는 중 오류가 발생했습니다:", error);
             }
         };
 
-        fetchPostsAndComments();
+        fetchPosts();
     }, []);
 
     const handleLikeToggle = async (boardNumber) => {
@@ -73,48 +43,6 @@ function BoardList() {
         }
     };
 
-    const handleCommentLikeToggle = async (commentId) => {
-        try {
-            const newLikeCount = await toggleCommentLike(commentId, userEmail);
-            setCommentLikes((prev) => ({
-                ...prev,
-                [commentId]: newLikeCount,
-            }));
-        } catch (error) {
-            console.error("댓글 좋아요 토글 중 오류 발생:", error);
-        }
-    };
-
-    const handleCommentChange = (boardNumber, value) => {
-        setNewComment((prev) => ({
-            ...prev,
-            [boardNumber]: value,
-        }));
-    };
-
-    const handleCommentSubmit = async (boardNumber) => {
-        try {
-            const commentData = {
-                content: newComment[boardNumber],
-                authorEmail: userEmail,
-                board: { boardNumber },
-            };
-            const createdComment = await createComment(commentData);
-
-            setComments((prev) => ({
-                ...prev,
-                [boardNumber]: [...(prev[boardNumber] || []), createdComment],
-            }));
-
-            setNewComment((prev) => ({
-                ...prev,
-                [boardNumber]: '',
-            }));
-        } catch (error) {
-            console.error("댓글 작성 중 오류 발생:", error);
-        }
-    };
-
     const handleDeletePost = async (boardNumber) => {
         try {
             await deletePost(boardNumber);
@@ -125,12 +53,8 @@ function BoardList() {
     };
 
     const goToEditPost = (boardNumber) => {
-        navigate(`/edit-post/${boardNumber}`); // 게시물 수정 페이지로 이동
+        navigate(`/edit-post/${boardNumber}`);
     };
-
-    if (error) {
-        return <div>{error}</div>;
-    }
 
     return (
         <div>
@@ -165,27 +89,7 @@ function BoardList() {
                             <button onClick={() => handleLikeToggle(post.boardNumber)}>좋아요</button>
                             <span>{likeCounts[post.boardNumber] || 0}</span>
                         </div>
-                        <div>
-                            <h4>댓글</h4>
-                            <ul>
-                                {comments[post.boardNumber]?.map((comment) => (
-                                    <li key={comment.id}>
-                                        <strong>{comment.authorEmail}</strong>: {comment.content}
-                                        <div>
-                                            <button onClick={() => handleCommentLikeToggle(comment.id)}>좋아요</button>
-                                            <span>{commentLikes[comment.id] || 0}</span>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                            <input
-                                type="text"
-                                value={newComment[post.boardNumber] || ''}
-                                onChange={(e) => handleCommentChange(post.boardNumber, e.target.value)}
-                                placeholder="댓글을 입력하세요."
-                            />
-                            <button onClick={() => handleCommentSubmit(post.boardNumber)}>댓글 작성</button>
-                        </div>
+                        <Comment boardNumber={post.boardNumber} userEmail={userEmail} />
                         {post.email === userEmail && (
                             <>
                                 <button onClick={() => goToEditPost(post.boardNumber)}>수정</button>

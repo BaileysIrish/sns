@@ -100,6 +100,18 @@ export const getCommentsByBoardId = async (boardId) => {
     return response.data;
 };
 
+
+export const updateComment = async (commentId, newContent) => {
+    try {
+        const response = await axios.put(`http://localhost:8080/api/comments/${commentId}`, {
+            content: newContent,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("댓글 수정 중 오류 발생:", error);
+        throw error;
+    }
+};
 export const deleteComment = async (commentId) => {
     await axios.delete(`http://localhost:8080/api/comments/${commentId}`);
 };
