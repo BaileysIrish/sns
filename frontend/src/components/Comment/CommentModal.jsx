@@ -5,7 +5,6 @@ import {
   DrawerContent,
   DrawerRoot,
 } from "@chakra-ui/react";
-import { CloseButton } from "../ui/close-button";
 import React, { useEffect, useState } from "react";
 import {
   BsBookmark,
@@ -16,7 +15,7 @@ import {
 import CommentTotal from "./CommentTotal";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
-import { IoPaperPlaneOutline } from "react-icons/io5";
+import { IoPaperPlaneOutline, IoPersonCircle } from "react-icons/io5";
 import "./CommentModal.css";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
 
@@ -27,34 +26,71 @@ export default function CommentModal({
   handleSavePost,
   open,
   setOpen,
-  boardNumber
+  boardNumber,
+  likeCount,
+  commentCount,
+  profileImage,
 }) {
-  const [comments, setComments] = useState([])
-  const [newComment, setNewComment] = useState('')
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [replyTo, setReplyTo] = useState(null); // 대댓글 대상
+  const userEmail = sessionStorage.getItem("userEmail");
 
-  const fetchNewComment = async ()=>{
-      try {
-        await createComment(newComment);
-      } catch (error) {
-        console.error("좋아요 개수 불러오기 실패:", error);
-      }
-    }
-
+  // 댓글 가져오기
   useEffect(() => {
-    if(!boardNumber)
-      return;
+    if (!boardNumber) return;
 
-    const fetchPosts = async () => {
+    const fetchComments = async () => {
       try {
-         const data = await getCommentsByBoardId(boardNumber); // API 호출
-         setComments(data); // 데이터 상태에 저장
+        const data = await getCommentsByBoardId(boardNumber);
+        // 좋아요 여부를 각 댓글에 추가
+        const updatedComments = data.map((comment) => ({
+          ...comment,
+          isLiked: comment.likedUsers?.includes(userEmail), // likedUsers 배열에 userEmail이 포함되어 있으면 true
+        }));
+        setComments(updatedComments);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        console.error("Error fetching comments:", error);
       }
     };
 
-    fetchPosts();
-  }, []);
+    fetchComments();
+  }, [boardNumber, userEmail]);
+
+  // 새로운 댓글 생성
+  const handleCreateComment = async () => {
+    if (!newComment.trim()) return; // 공백 댓글 방지
+
+    try {
+      const sanitizedContent = replyTo
+        ? newComment.replace(`@${replyTo.authorEmail}`, "").trim() // @username 제거
+        : newComment;
+
+      const commentData = {
+        boardId: boardNumber,
+        content: sanitizedContent,
+        authorEmail: userEmail,
+        parentCommentId: replyTo ? replyTo.id : null, // 대댓글일 경우 parentCommentId 추가
+      };
+      // 서버에 댓글 추가 요청
+      const createdComment = await createComment(commentData);
+
+      // 새로운 댓글을 상태에 추가
+      setComments((prevComments) => [...prevComments, createdComment]);
+      setNewComment(""); // 입력창 초기화
+      setReplyTo(null); // 대댓글 대상 초기화
+
+      const updatedComments = await getCommentsByBoardId(boardNumber); // 댓글 목록 갱신
+      setComments(updatedComments);
+    } catch (error) {
+      console.error("Failed to create comment:", error);
+    }
+  };
+
+  const handleReply = (comment) => {
+    setReplyTo(comment); // 대댓글 대상 설정
+    setNewComment(`@${comment.authorEmail} `); // 입력창에 ID 자동 추가
+  };
 
   return (
     <DrawerRoot size={"2xl"} open={open} onOpenChange={(e) => setOpen(e.open)}>
@@ -86,23 +122,32 @@ export default function CommentModal({
               <div className="flex justify-between items-center py-3 px-3">
                 <div className="flex items-center">
                   <div>
-                    <img
-                      className="w-9 h-9 rounded-full"
-                      src="https://cdn.pixabay.com/photo/2024/04/18/09/44/polar-bear-8703907_640.jpg"
-                      alt=""
-                    />
+                    {profileImage ? (
+                      <img
+                        className="w-9 h-9 rounded-full"
+                        src={profileImage}
+                        alt="Profile"
+                      />
+                    ) : (
+                      <IoPersonCircle className="w-9 h-9 text-gray-500" />
+                    )}
                   </div>
                   <div className="ml-2">
-                    <p>username</p>
+                    <p>{userEmail}</p>
                   </div>
                 </div>
                 <BsThreeDots />
               </div>
               <hr />
               <div className="comment">
-                {comments?.map((item) => (
-                    <CommentTotal comment={item}/>
-                  ))}
+                {comments.map((comment) => (
+                  <CommentTotal
+                    key={comment.id}
+                    comment={comment}
+                    userEmail={userEmail} // 현재 사용자 이메일 전달
+                    onReply={handleReply} // 대댓글 작성
+                  />
+                ))}
               </div>
 
               <div className="absolute bottom-0 w-full">
@@ -138,8 +183,11 @@ export default function CommentModal({
                 </div>
 
                 <div className="w-full py-2 px-2">
-                  <p>10명이 좋아합니다</p>
-                  <p className="opacity-50 text-sm">1일전</p>
+                  <p>{likeCount}명이 좋아합니다</p> {/* 좋아요 개수 */}
+                  <p className="text-gray-400 py-1 cursor-pointer">
+                    댓글 {commentCount}개 모두 보기
+                  </p>{" "}
+                  {/* 댓글 개수 */}
                 </div>
 
                 <div className="border-t">
@@ -150,10 +198,12 @@ export default function CommentModal({
                       type="text"
                       placeholder="댓글 달기..."
                       value={newComment}
-                      onChange={(e)=>{setNewComment(e.target.value)}}
+                      onChange={(e) => {
+                        setNewComment(e.target.value);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          fetchNewComment()
+                          handleCreateComment();
                         }
                       }}
                     />

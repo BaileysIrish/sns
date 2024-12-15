@@ -45,7 +45,6 @@ public class BoardService {
         // 업데이트 시 기존 게시물 유효성 검증
         Board existingBoard = boardRepository.findById(board.getBoardNumber()).orElseThrow(() ->
                 new IllegalArgumentException("해당 게시물이 존재하지 않습니다."));
-        existingBoard.setTitle(board.getTitle());
         existingBoard.setContent(board.getContent());
         return boardRepository.save(existingBoard);
     }

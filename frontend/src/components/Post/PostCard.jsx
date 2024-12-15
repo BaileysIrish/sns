@@ -8,10 +8,11 @@ import {
 import "./PostCard.css";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
-import { IoPaperPlaneOutline } from "react-icons/io5";
+import { IoPaperPlaneOutline, IoPersonCircle } from "react-icons/io5";
 import CommentModal from "../Comment/CommentModal";
 import { toggleLike, getLikeCount } from "../../api/likes";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
+import { getUserProfile } from "../../api/User";
 
 export default function PostCard({ post }) {
   const { title, email, content, boardNumber, files } = post;
@@ -21,17 +22,10 @@ export default function PostCard({ post }) {
   const [commentCount, setCommentCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [open, setOpen] = useState(false);
-  const [newComment, setNewComment] = useState('')
+  const [newComment, setNewComment] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
 
-  const fetchNewComment = async ()=>{
-    try {
-      await createComment(newComment);
-    } catch (error) {
-      console.error("좋아요 개수 불러오기 실패:", error);
-    }
-  }
-  
-  // 좋아요 개수 불러오기
+  // 좋아요 및 댓글 개수 불러오기
   useEffect(() => {
     const fetchLikeCount = async () => {
       try {
@@ -44,8 +38,7 @@ export default function PostCard({ post }) {
 
     const fetchCommentCount = async () => {
       if (!boardNumber) {
-        console.log("boardNumber가 존재하지 않습니다. 게시물이 없습니다.");
-        setCommentCount(0); // 댓글 개수를 0으로 초기화
+        setCommentCount(0);
         return;
       }
       try {
@@ -53,7 +46,7 @@ export default function PostCard({ post }) {
         setCommentCount(Array.isArray(comments) ? comments.length : 0);
       } catch (error) {
         console.error("댓글 개수 불러오기 실패:", error);
-        setCommentCount(0); // 실패한 경우에도 안전하게 초기화
+        setCommentCount(0);
       }
     };
 
@@ -61,17 +54,55 @@ export default function PostCard({ post }) {
     fetchCommentCount();
   }, [boardNumber]);
 
+  // 프로필 이미지 가져오기
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const userProfile = await getUserProfile(email);
+        setProfileImage(userProfile.profileImage);
+      } catch (error) {
+        console.error("프로필 이미지 가져오기 실패:", error);
+      }
+    };
+
+    if (email) {
+      fetchProfileImage();
+    }
+  }, [email]);
+
   const handleSavePost = () => {
     setIsSaved(!isSaved);
   };
 
   const handlePostLike = async () => {
     try {
-      await toggleLike(boardNumber, "user@example.com"); // 이메일은 실제 유저 정보로 대체
+      await toggleLike(boardNumber, email);
       setIsPostLiked(!isPostLiked);
       setLikeCount((prev) => (isPostLiked ? prev - 1 : prev + 1));
     } catch (error) {
       console.error("좋아요 처리 중 오류:", error);
+    }
+  };
+
+  // 새로운 댓글 생성
+  const handleCreateComment = async () => {
+    if (!newComment.trim()) return; // 공백 댓글 방지
+
+    try {
+      const commentData = {
+        boardId: boardNumber,
+        content: newComment,
+        authorEmail: email, // 작성자 이메일 사용
+        parentCommentId: null,
+      };
+
+      await createComment(commentData);
+      setNewComment(""); // 입력창 초기화
+
+      const comments = await getCommentsByBoardId(boardNumber); // 댓글 목록 갱신
+      setCommentCount(Array.isArray(comments) ? comments.length : 0); // 댓글 수 업데이트
+    } catch (error) {
+      console.error("Failed to create comment:", error);
     }
   };
 
@@ -83,13 +114,16 @@ export default function PostCard({ post }) {
       <div className="border rounded-md w-full">
         <div className="flex justify-between items-center py-4 px-5">
           <div className="flex items-center">
-            <img
-              className="h-12 w-12 rounded-full"
-              src="https://cdn.pixabay.com/photo/2024/06/25/21/08/train-8853636_640.jpg"
-              alt=""
-            />
+            {profileImage ? (
+              <img
+                className="h-12 w-12 rounded-full"
+                src={profileImage}
+                alt="Profile"
+              />
+            ) : (
+              <IoPersonCircle className="h-12 w-12 text-gray-500" />
+            )}
             <div className="pl-2">
-              <p className="font-semibold text-sm">{title}</p>
               <p className="font-thin text-sm">{email}</p>
             </div>
           </div>
@@ -105,7 +139,7 @@ export default function PostCard({ post }) {
           </div>
         </div>
         <div className="w-full">
-          {files?.length > 0 ? (
+          {files?.length > 0 &&
             files.map((file, index) => (
               <div key={index}>
                 {file.fileType.startsWith("image/") ? (
@@ -118,12 +152,7 @@ export default function PostCard({ post }) {
                   <video className="w-full" src={file.fileUrl} controls />
                 ) : null}
               </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-400 py-4">
-              첨부된 파일이 없습니다.
-            </p>
-          )}
+            ))}
           <div className="m-5">{content}</div>
         </div>
         <div className="flex justify-between items-center w-full px-1 py-4">
@@ -176,10 +205,12 @@ export default function PostCard({ post }) {
               type="text"
               placeholder="댓글 달기..."
               value={newComment}
-              onChange={(e)=>{setNewComment(e.target.value)}}
+              onChange={(e) => {
+                setNewComment(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  fetchNewComment()
+                  handleCreateComment();
                 }
               }}
             />
@@ -195,6 +226,9 @@ export default function PostCard({ post }) {
         open={open}
         setOpen={setOpen}
         boardNumber={boardNumber}
+        likeCount={likeCount}
+        commentCount={commentCount}
+        profileImage={profileImage}
       />
     </li>
   );

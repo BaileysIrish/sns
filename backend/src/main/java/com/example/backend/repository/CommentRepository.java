@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
     List<Comment> findByBoard_BoardNumber(int boardNumber);
+
+    List<Comment> findByParentComment_Id(int parentCommentId);
 }

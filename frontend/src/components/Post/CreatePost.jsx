@@ -13,6 +13,7 @@ import { GoLocation } from "react-icons/go";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import "./CreatePost.css";
 import AlertDelete from "./AlertDelete";
+import { createPost } from "../../api/posts";
 
 export default function CreatePost({ open, setOpen }) {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -20,6 +21,36 @@ export default function CreatePost({ open, setOpen }) {
   const [caption, setCaption] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [isClosingDrawer, setIsClosingDrawer] = useState(false);
+
+  const handleSharePost = async () => {
+    if (!file && !caption) {
+      alert("파일 또는 내용을 입력해주세요!");
+      return;
+    }
+    const userEmail = sessionStorage.getItem("userEmail");
+
+    const formData = new FormData();
+    formData.append("content", caption);
+    formData.append("email", userEmail); // 사용자의 이메일
+
+    if (file) {
+      formData.append("files", file);
+    } else {
+      formData.append("files", new Blob()); // 빈 파일 추가
+    }
+
+    try {
+      const response = await createPost(formData);
+      alert("게시물이 성공적으로 업로드되었습니다!");
+      console.log("업로드된 게시물:", response);
+      setFile(null);
+      setCaption("");
+      setOpen(false); // 드로어 닫기
+    } catch (error) {
+      console.error("게시물 업로드 중 오류 발생:", error);
+      alert("게시물 업로드 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -120,6 +151,7 @@ export default function CreatePost({ open, setOpen }) {
               variant={"ghost"}
               size={"sm"}
               colorScheme={"blue"}
+              onClick={handleSharePost}
             >
               공유하기
             </Button>

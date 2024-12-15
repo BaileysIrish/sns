@@ -37,14 +37,12 @@ public class BoardController {
 
     @PostMapping("/create")
     public ResponseEntity<BoardDto> createPost(
-            @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("email") String email,
-            @RequestParam("files") List<MultipartFile> files) {
+            @RequestParam(value = "files",required = false) List<MultipartFile> files) {
 
         // 게시물 데이터 설정
         Board board = new Board();
-        board.setTitle(title);
         board.setContent(content);
         board.setEmail(email);
         board.setWriteDatetime(LocalDateTime.now());
@@ -82,14 +80,12 @@ public class BoardController {
     @PutMapping("/update/{boardNumber}")
     public ResponseEntity<BoardDto> updatePost(
             @PathVariable int boardNumber,
-            @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam(value = "files", required = false) List<MultipartFile> files) {
 
         // 게시물 수정
         Board board = new Board();
         board.setBoardNumber(boardNumber);
-        board.setTitle(title);
         board.setContent(content);
 
         Board updatedBoard = boardService.updatePost(board);
@@ -150,9 +146,9 @@ public class BoardController {
     private BoardDto convertToDto(Board board) {
         BoardDto boardDto = new BoardDto();
         boardDto.setBoardNumber(board.getBoardNumber());
-        boardDto.setTitle(board.getTitle());
         boardDto.setContent(board.getContent());
         boardDto.setEmail(board.getEmail());
+        boardDto.setWriteDatetime(board.getWriteDatetime()); // 작성 날짜 추가
         boardDto.setFiles(board.getFiles().stream().map(file -> {
             BoardFileDto fileDto = new BoardFileDto();
             fileDto.setFilePath(file.getFilePath());
