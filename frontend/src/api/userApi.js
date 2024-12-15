@@ -89,7 +89,6 @@ export const getLikeCount = async (boardNumber) => {
     return response.data; // 좋아요 개수 반환
 };
 
-
 export const createComment = async (commentData) => {
     const response = await axios.post("http://localhost:8080/api/comments", commentData);
     return response.data;
@@ -100,6 +99,17 @@ export const getCommentsByBoardId = async (boardId) => {
     return response.data;
 };
 
+// 추가된 대댓글 생성 함수
+export const createReply = async (replyData) => {
+    const response = await axios.post("http://localhost:8080/api/comments", replyData);
+    return response.data;
+};
+
+// 추가된 대댓글 포함 댓글 조회 함수
+export const getCommentsWithRepliesByBoardId = async (boardId) => {
+    const response = await axios.get(`http://localhost:8080/api/comments/${boardId}`);
+    return response.data;
+};
 
 export const updateComment = async (commentId, newContent) => {
     try {
@@ -127,4 +137,5 @@ export const getCommentLikeCount = async (commentId) => {
     const response = await axios.get(`http://localhost:8080/api/comment-likes/${commentId}`);
     return response.data; // 댓글 좋아요 개수 반환
 };
+
 
