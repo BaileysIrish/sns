@@ -138,4 +138,28 @@ export const getCommentLikeCount = async (commentId) => {
     return response.data; // 댓글 좋아요 개수 반환
 };
 
+// 스토리 생성
+export const createStory = async (userEmail, files) => {
+    const formData = new FormData();
+    formData.append("userEmail", userEmail);
+    files.forEach(file => formData.append("files", file));
+
+    const response = await axios.post("http://localhost:8080/api/stories", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data;
+};
+
+// 사용자의 스토리 조회
+export const getUserStories = async (userEmail) => {
+    const response = await axios.get(`http://localhost:8080/api/stories/user/${userEmail}`);
+    return response.data;
+};
+
+// 스토리 삭제
+export const deleteStory = async (storyId) => {
+    await axios.delete(`http://localhost:8080/api/stories/${storyId}`);
+};
 

@@ -5,7 +5,9 @@ import LoginForm from './components/LoginForm';
 import Home from './components/Home';
 import BoardList from './components/BoardList';
 import CreatePost from './components/CreatePost';
-import EditPost from './components/EditPost'; // 수정 페이지 추가
+import CreateStory from './components/CreateStory'; // 스토리 생성
+import StoryList from './components/StoryList'; // 스토리 목록
+
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -16,10 +18,17 @@ function App() {
                 <h1>회원가입 및 로그인</h1>
                 {isLoggedIn ? (
                     <Routes>
+                        {/* 홈 화면 */}
                         <Route path="/" element={<Home setIsLoggedIn={setIsLoggedIn} />} />
+
+                        {/* 게시물 관련 */}
                         <Route path="/board" element={<BoardList />} />
                         <Route path="/create-post" element={<CreatePost />} />
-                        <Route path="/edit-post/:postId" element={<EditPost />} /> {/* 수정 페이지 경로 추가 */}
+
+                        {/* 스토리 관련 */}
+                        <Route path="/create-story" element={<CreateStory userEmail={localStorage.getItem("userEmail")} />} />
+                        <Route path="/stories" element={<StoryList userEmail={localStorage.getItem("userEmail")} />} />
+
                     </Routes>
                 ) : (
                     <>
