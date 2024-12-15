@@ -7,6 +7,7 @@ import SearchTab from "../Search/SearchTab";
 import { IoLogoInstagram } from "react-icons/io5";
 import { AnimatePresence, motion } from "framer-motion";
 import "./Sidebar.css";
+import Logout from "../Register/Logout";
 
 export default function Sidebar() {
   const [activeTab, setActiveTab] = useState();
@@ -65,6 +66,7 @@ export default function Sidebar() {
       setActiveTab("홈");
     }
   }, [searchOpen]);
+
   return (
     <div className="sticky top-0 h-[100vh] flex">
       <motion.div
@@ -121,9 +123,9 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div className="flex items-center cursor-pointer pb-10">
+        <div className="flex items-center cursor-pointer pb-10 p-3 space-x-6">
           <BsList className="text-2xl" />
-          {!searchOpen && <p className="ml-5">더 보기</p>}
+          {!searchOpen && <Logout />}
         </div>
       </motion.div>
 
