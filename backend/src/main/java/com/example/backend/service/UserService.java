@@ -60,13 +60,15 @@ public class UserService {
     // 모든 사용자 정보 반환
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            throw new IllegalArgumentException("등록된 사용자가 없습니다.");
+        }
         return users.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    // 이메일로 사용자 찾기
-    public User findByEmail(String email) {
+    public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 }

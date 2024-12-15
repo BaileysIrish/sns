@@ -5,16 +5,21 @@ export const getUserProfile = async (email) => {
   return response.data;
 };
 
-// 현재 로그인한 사용자 정보 가져오기
 export const getCurrentUser = async () => {
   try {
+    const userEmail = sessionStorage.getItem("userEmail");
+    if (!userEmail) {
+      throw new Error(
+        "로그인된 사용자가 없습니다. 세션이 만료되었을 수 있습니다."
+      );
+    }
+
     const response = await axios.get(
-      "http://localhost:8080/api/users/current",
+      `http://localhost:8080/api/users/current/${userEmail}`,
       {
         headers: {
           "Content-Type": "application/json",
         },
-        withCredentials: true, // 세션을 사용하는 경우 필요
       }
     );
     return response.data; // 사용자 정보 반환
@@ -34,7 +39,7 @@ export const getAllUsers = async () => {
     });
     return response.data; // 모든 사용자 정보 반환
   } catch (error) {
-    console.error("Failed to fetch all users:", error);
+    console.error("모든 사용자 정보를 가져오는 데 실패했습니다:", error);
     throw error;
   }
 };

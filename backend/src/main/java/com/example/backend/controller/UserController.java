@@ -92,22 +92,21 @@ public class UserController {
     }
 
     // 현재 로그인한 사용자의 정보 가져오기
-    @GetMapping("/current")
-    public ResponseEntity<UserDto> getCurrentUser(HttpSession session) {
-        // 세션에서 email 가져오기
-        String userEmail = (String) session.getAttribute("userEmail");
-        if (userEmail == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+    @GetMapping("/current/{email}")
+    public ResponseEntity<?> getCurrentUser(@PathVariable String email) {
+        try {
+            User user = userService.findUserByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("사용자를 찾을 수 없습니다.");
+            }
 
-        // 이메일로 사용자 정보 가져오기
-        User user = userService.findByEmail(userEmail);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            UserDto userDto = userService.convertToDto(user);
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("사용자 정보를 가져오는 중 오류가 발생했습니다.");
         }
-
-        UserDto userDto = userService.convertToDto(user);
-        return ResponseEntity.ok(userDto);
     }
 
     // 모든 사용자 정보 가져오기
