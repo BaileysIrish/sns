@@ -27,8 +27,15 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    private Board board; // 댓글이 속한 게시물(Board)과의 관계
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment; // 부모 댓글 참조 (null이면 최상위 댓글)
+
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> replies; // 대댓글 리스트
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<CommentLike> commentLikes; // Comment 삭제 시 CommentLike 자동 삭제
+    private List<CommentLike> commentLikes; // 댓글 삭제 시 CommentLike 자동 삭제
 }

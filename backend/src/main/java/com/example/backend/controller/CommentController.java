@@ -18,32 +18,28 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    // 기존의 댓글 생성
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
         Comment createdComment = commentService.createComment(comment);
         return ResponseEntity.ok(createdComment);
     }
 
-    // 특정 게시글의 댓글 조회
     @GetMapping("/{boardId}")
     public ResponseEntity<List<CommentDTO>> getCommentsByBoardId(@PathVariable int boardId) {
         List<CommentDTO> comments = commentService.getCommentsByBoardId(boardId);
         return ResponseEntity.ok(comments);
     }
 
-    // 새로운: 매개변수가 없는 경우 처리 (GET /api/comments)
     @GetMapping
-    public ResponseEntity<String> handleInvalidGetRequest() {
-        return ResponseEntity.badRequest().body("boardId is required for this request.");
+    public ResponseEntity<List<CommentDTO>> getAllComments() {
+        List<CommentDTO> comments = commentService.getAllComments();
+        return ResponseEntity.ok(comments);
     }
-
 
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentDTO> updateComment(
             @PathVariable int commentId,
             @RequestBody CommentDTO commentDTO) {
-
         Comment updatedComment = commentService.updateComment(commentId, commentDTO.getContent());
         return ResponseEntity.ok(new CommentDTO(
                 updatedComment.getId(),
@@ -53,7 +49,6 @@ public class CommentController {
         ));
     }
 
-    // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable int commentId) {
         commentService.deleteComment(commentId);
