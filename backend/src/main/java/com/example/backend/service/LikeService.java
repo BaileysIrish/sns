@@ -47,4 +47,5 @@ public class LikeService {
                 .orElseThrow(() -> new IllegalArgumentException("Board not found."));
         return likeRepository.countByBoard(board);
     }
+
 }

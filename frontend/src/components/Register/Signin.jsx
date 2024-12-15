@@ -27,7 +27,6 @@ export default function Signin() {
       console.log("Login successful:", response);
       sessionStorage.setItem("userEmail", response); // sessionStorage 저장
 
-      // 로그인 성공 시 대시보드로 이동
       navigate("/"); // 홈으로 이동
     } catch (error) {
       // 서버 에러 처리

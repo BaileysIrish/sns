@@ -19,7 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -158,4 +160,45 @@ public class BoardController {
         }).collect(Collectors.toList()));
         return boardDto;
     }
+
+    // 좋아요 토글 API
+    @PostMapping("/{boardNumber}/favorite")
+    public ResponseEntity<Map<String, Object>> toggleFavorite(
+            @PathVariable int boardNumber,
+            @RequestParam String email) {
+        try {
+            boolean isLiked = boardService.toggleFavorite(boardNumber, email);
+            int favoriteCount = boardService.getFavoriteCount(boardNumber);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("isLiked", isLiked);
+            response.put("favoriteCount", favoriteCount);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to toggle favorite"));
+        }
+    }
+
+    // 좋아요 상태 및 개수 가져오기 API
+    @GetMapping("/{boardNumber}/favorite-status")
+    public ResponseEntity<Map<String, Object>> getFavoriteStatus(
+            @PathVariable int boardNumber,
+            @RequestParam String email) {
+        try {
+            boolean isLiked = boardService.isPostLikedByUser(boardNumber, email); // 특정 사용자 상태 확인
+            int favoriteCount = boardService.getFavoriteCount(boardNumber); // 좋아요 개수
+
+            Map<String, Object> response = Map.of(
+                    "isLiked", isLiked,
+                    "favoriteCount", favoriteCount
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to retrieve favorite status"));
+        }
+    }
+
+
 }

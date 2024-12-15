@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.service.LikeService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,4 +23,5 @@ public class LikeController {
     public int getLikeCount(@PathVariable int boardNumber) {
         return likeService.getLikeCount(boardNumber);
     }
-}
+
+    }

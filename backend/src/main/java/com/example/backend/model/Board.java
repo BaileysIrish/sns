@@ -39,4 +39,9 @@ public class Board {
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "board_favorite_users", joinColumns = @JoinColumn(name = "board_number"))
+    @Column(name = "email")
+    private List<String> favoriteUsers = new ArrayList<>(); // 좋아요를 누른 사용자 이메일 목록
 }

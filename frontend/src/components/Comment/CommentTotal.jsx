@@ -1,18 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import { toggleCommentLike } from "../../api/comments";
+import {
+  getCommentLikeCount,
+  toggleCommentLike,
+  getCommentLikeStatus,
+} from "../../api/comments";
 
 export default function CommentTotal({ comment, userEmail, onReply }) {
   const [isCommentLiked, setIsCommentLiked] = useState(
     comment.isLiked || false
   );
+  const [likeCount, setLikeCount] = useState(0);
 
   const [showReplies, setShowReplies] = useState(false); // 대댓글 표시 여부
 
+  // 좋아요 상태와 개수 가져오기
+  useEffect(() => {
+    const fetchLikeData = async () => {
+      try {
+        // 좋아요 개수와 상태를 비동기로 동시에 가져옴
+        const [count, isLiked] = await Promise.all([
+          getCommentLikeCount(comment.id),
+          getCommentLikeStatus(comment.id, userEmail),
+        ]);
+
+        // 상태 업데이트
+        setLikeCount(count);
+        setIsCommentLiked(isLiked);
+      } catch (error) {
+        console.error("Failed to fetch like data:", error);
+      }
+    };
+
+    fetchLikeData();
+  }, [comment.id, userEmail]);
+
+  // 좋아요 토글
   const handleLikeComment = async () => {
+    if (!userEmail) {
+      console.error("User email is missing!");
+      return;
+    }
     try {
-      await toggleCommentLike(comment.id, userEmail); // 서버에 좋아요 요청
-      setIsCommentLiked(!isCommentLiked); // 로컬 상태 업데이트
+      // 서버에서 반환된 좋아요 상태와 카운트 데이터
+      const { isLiked, likeCount } = await toggleCommentLike(
+        comment.id,
+        userEmail
+      );
+
+      // 서버 응답을 바탕으로 즉시 클라이언트 상태 업데이트
+      setIsCommentLiked(isLiked);
+      setLikeCount(likeCount);
     } catch (error) {
       console.error("Failed to toggle like:", error);
     }
@@ -36,6 +74,7 @@ export default function CommentTotal({ comment, userEmail, onReply }) {
             </p>
             <div className="flex items-center space-x-3 text-xs opacity-60 pt-1">
               <span>{comment.createdAt}</span>
+              <span className="ml-2 text-sm">좋아요 {likeCount}개</span>
               <span className="cursor-pointer" onClick={() => onReply(comment)}>
                 답글 달기
               </span>

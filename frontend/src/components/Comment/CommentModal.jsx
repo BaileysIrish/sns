@@ -20,6 +20,8 @@ import "./CommentModal.css";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
 
 export default function CommentModal({
+  comments,
+  setComments,
   isSaved,
   isPostLiked,
   handlePostLike,
@@ -30,11 +32,10 @@ export default function CommentModal({
   likeCount,
   commentCount,
   profileImage,
+  userEmail,
 }) {
-  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null); // 대댓글 대상
-  const userEmail = sessionStorage.getItem("userEmail");
 
   // 댓글 가져오기
   useEffect(() => {
@@ -73,15 +74,12 @@ export default function CommentModal({
         parentCommentId: replyTo ? replyTo.id : null, // 대댓글일 경우 parentCommentId 추가
       };
       // 서버에 댓글 추가 요청
-      const createdComment = await createComment(commentData);
-
-      // 새로운 댓글을 상태에 추가
-      setComments((prevComments) => [...prevComments, createdComment]);
-      setNewComment(""); // 입력창 초기화
-      setReplyTo(null); // 대댓글 대상 초기화
+      await createComment(commentData);
 
       const updatedComments = await getCommentsByBoardId(boardNumber); // 댓글 목록 갱신
       setComments(updatedComments);
+      setNewComment(""); // 입력창 초기화
+      setReplyTo(null); // 대댓글 대상 초기화
     } catch (error) {
       console.error("Failed to create comment:", error);
     }

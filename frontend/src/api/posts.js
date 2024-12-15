@@ -46,3 +46,31 @@ export const updatePost = async (boardNumber, formData) => {
     throw error;
   }
 };
+
+export const toggleFavorite = async (boardNumber, email) => {
+  try {
+    const response = await axios.post(
+      `http://localhost:8080/api/board/${boardNumber}/favorite`,
+      null,
+      { params: { email } }
+    );
+    return response.data; // { isLiked: true/false, favoriteCount: number }
+  } catch (error) {
+    console.error("좋아요 토글 중 오류:", error);
+    throw error;
+  }
+};
+
+// 좋아요 상태 및 개수 가져오기
+export const getFavoriteStatus = async (boardNumber, email) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/api/board/${boardNumber}/favorite-status`,
+      { params: { email } }
+    );
+    return response.data; // { isLiked: true/false, favoriteCount: number }
+  } catch (error) {
+    console.error("좋아요 상태 가져오기 중 오류:", error);
+    throw error;
+  }
+};

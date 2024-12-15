@@ -7,6 +7,7 @@ import com.example.backend.repository.BoardFileRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -60,4 +61,42 @@ public class BoardService {
                 new IllegalArgumentException("해당 게시물이 존재하지 않습니다."));
         return board.getEmail().equals(userEmail);
     }
+
+    // 좋아요 토글
+    public boolean toggleFavorite(int boardNumber, String email) {
+        Board board = boardRepository.findById(boardNumber)
+                .orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다."));
+
+        boolean isLiked = board.getFavoriteUsers().contains(email);
+
+        if (isLiked) {
+            // 좋아요 취소
+            board.setFavoriteCount(board.getFavoriteCount() - 1);
+            board.getFavoriteUsers().remove(email);
+        } else {
+            // 좋아요 추가
+            board.setFavoriteCount(board.getFavoriteCount() + 1);
+            board.getFavoriteUsers().add(email);
+        }
+
+        boardRepository.save(board); // 변경 사항 저장
+        return !isLiked; // 새로운 상태 반환
+    }
+
+    // 좋아요 개수 가져오기
+    public int getFavoriteCount(int boardNumber) {
+        Board board = boardRepository.findById(boardNumber)
+                .orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다."));
+        return board.getFavoriteCount();
+    }
+
+    // 특정 사용자의 좋아요 상태 확인
+    public boolean isPostLikedByUser(int boardNumber, String email) {
+        Board board = boardRepository.findById(boardNumber)
+                .orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다."));
+        return board.getFavoriteUsers().contains(email);
+    }
+
+
+
 }

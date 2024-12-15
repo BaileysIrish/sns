@@ -10,7 +10,7 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline, IoPersonCircle } from "react-icons/io5";
 import CommentModal from "../Comment/CommentModal";
-import { toggleLike, getLikeCount } from "../../api/likes";
+import { toggleFavorite, getFavoriteStatus } from "../../api/posts";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
 import { getUserProfile } from "../../api/User";
 
@@ -24,50 +24,54 @@ export default function PostCard({ post }) {
   const [open, setOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+  const [comments, setComments] = useState([]); // 댓글 상태 추가
+  // 현재 사용자 이메일을 sessionStorage에서 가져오기
+  const currentUserEmail = sessionStorage.getItem("userEmail");
 
-  // 좋아요 및 댓글 개수 불러오기
+  // 좋아요 및 댓글 초기화
   useEffect(() => {
-    const fetchLikeCount = async () => {
+    const fetchPostData = async () => {
       try {
-        const count = await getLikeCount(boardNumber);
-        setLikeCount(count);
+        // 좋아요 상태 및 개수 가져오기
+        const { isLiked, favoriteCount } = await getFavoriteStatus(
+          boardNumber,
+          currentUserEmail
+        );
+        setIsPostLiked(isLiked);
+        setLikeCount(favoriteCount);
+
+        // 댓글 개수 가져오기
+        const fetchedComments = await getCommentsByBoardId(boardNumber);
+        setComments(fetchedComments);
+        setCommentCount(fetchedComments.length);
       } catch (error) {
-        console.error("좋아요 개수 불러오기 실패:", error);
+        console.error("게시물 데이터 초기화 실패:", error);
+        alert("게시물을 불러오는 중 오류가 발생했습니다.");
       }
     };
 
-    const fetchCommentCount = async () => {
-      if (!boardNumber) {
-        setCommentCount(0);
-        return;
-      }
-      try {
-        const comments = await getCommentsByBoardId(boardNumber);
-        setCommentCount(Array.isArray(comments) ? comments.length : 0);
-      } catch (error) {
-        console.error("댓글 개수 불러오기 실패:", error);
-        setCommentCount(0);
-      }
-    };
-
-    fetchLikeCount();
-    fetchCommentCount();
-  }, [boardNumber]);
+    fetchPostData();
+  }, [boardNumber, currentUserEmail]);
 
   // 프로필 이미지 가져오기
   useEffect(() => {
+    let isMounted = true; // 컴포넌트가 언마운트된 경우 fetch 취소
     const fetchProfileImage = async () => {
       try {
         const userProfile = await getUserProfile(email);
-        setProfileImage(userProfile.profileImage);
+        if (isMounted) {
+          setProfileImage(userProfile.profileImage);
+        }
       } catch (error) {
         console.error("프로필 이미지 가져오기 실패:", error);
       }
     };
 
-    if (email) {
-      fetchProfileImage();
-    }
+    if (email) fetchProfileImage();
+
+    return () => {
+      isMounted = false; // 언마운트 시 상태 업데이트 방지
+    };
   }, [email]);
 
   const handleSavePost = () => {
@@ -76,9 +80,18 @@ export default function PostCard({ post }) {
 
   const handlePostLike = async () => {
     try {
-      await toggleLike(boardNumber, email);
-      setIsPostLiked(!isPostLiked);
-      setLikeCount((prev) => (isPostLiked ? prev - 1 : prev + 1));
+      // 서버로 좋아요 토글 요청
+      await toggleFavorite(boardNumber, currentUserEmail);
+
+      // 서버에서 최신 상태 가져오기
+      const { isLiked, favoriteCount } = await getFavoriteStatus(
+        boardNumber,
+        currentUserEmail
+      );
+
+      // 서버 응답을 기반으로 좋아요 상태 및 개수 업데이트
+      setIsPostLiked(isLiked);
+      setLikeCount(favoriteCount);
     } catch (error) {
       console.error("좋아요 처리 중 오류:", error);
     }
@@ -92,15 +105,16 @@ export default function PostCard({ post }) {
       const commentData = {
         boardId: boardNumber,
         content: newComment,
-        authorEmail: email, // 작성자 이메일 사용
+        authorEmail: currentUserEmail, // 작성자 이메일 사용
         parentCommentId: null,
       };
 
       await createComment(commentData);
       setNewComment(""); // 입력창 초기화
 
-      const comments = await getCommentsByBoardId(boardNumber); // 댓글 목록 갱신
-      setCommentCount(Array.isArray(comments) ? comments.length : 0); // 댓글 수 업데이트
+      const updatedComments = await getCommentsByBoardId(boardNumber);
+      setComments(updatedComments); // 댓글 상태 업데이트
+      setCommentCount(updatedComments.length); // 댓글 수 업데이트
     } catch (error) {
       console.error("Failed to create comment:", error);
     }
@@ -219,6 +233,8 @@ export default function PostCard({ post }) {
         </div>
       </div>
       <CommentModal
+        comments={comments} // 댓글 상태 전달
+        setComments={setComments} // 댓글 상태 업데이트 함수 전달
         handlePostLike={handlePostLike}
         handleSavePost={handleSavePost}
         isPostLiked={isPostLiked}
@@ -229,6 +245,7 @@ export default function PostCard({ post }) {
         likeCount={likeCount}
         commentCount={commentCount}
         profileImage={profileImage}
+        userEmail={currentUserEmail}
       />
     </li>
   );
