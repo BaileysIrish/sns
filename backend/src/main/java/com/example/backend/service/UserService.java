@@ -5,6 +5,9 @@ import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
 
@@ -43,4 +46,27 @@ public class UserService {
         return user;
     }
 
+    // 특정 사용자 엔티티를 UserDto로 변환
+    public UserDto convertToDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setEmail(user.getEmail());
+        userDto.setPassword(user.getPassword());
+        userDto.setNickname(user.getNickname());
+        userDto.setTelNumber(user.getTelNumber());
+        userDto.setProfileImage(user.getProfileImage());
+        return userDto;
+    }
+
+    // 모든 사용자 정보 반환
+    public List<UserDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 이메일로 사용자 찾기
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 }

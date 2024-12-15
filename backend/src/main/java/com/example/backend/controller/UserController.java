@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -89,4 +90,32 @@ public class UserController {
         session.invalidate();  // 세션을 무효화하여 로그아웃 처리
         return ResponseEntity.ok("로그아웃 성공");
     }
+
+    // 현재 로그인한 사용자의 정보 가져오기
+    @GetMapping("/current")
+    public ResponseEntity<UserDto> getCurrentUser(HttpSession session) {
+        // 세션에서 email 가져오기
+        String userEmail = (String) session.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // 이메일로 사용자 정보 가져오기
+        User user = userService.findByEmail(userEmail);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        UserDto userDto = userService.convertToDto(user);
+        return ResponseEntity.ok(userDto);
+    }
+
+    // 모든 사용자 정보 가져오기
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> allUsers = userService.getAllUsers();
+        return ResponseEntity.ok(allUsers);
+    }
+
+
 }
