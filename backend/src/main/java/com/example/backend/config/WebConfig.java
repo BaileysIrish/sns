@@ -24,7 +24,7 @@ public class WebConfig {
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 registry.addResourceHandler("/images/**")
-                        .addResourceLocations("C:\\study\\sns\\backend\\src\\profileImage");
+                        .addResourceLocations("file:C:/uploads/profileImages/");
 
             }
         };

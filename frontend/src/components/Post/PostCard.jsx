@@ -130,8 +130,8 @@ export default function PostCard({ post }) {
           <div className="flex items-center">
             {profileImage ? (
               <img
-                className="h-12 w-12 rounded-full"
-                src={profileImage}
+                className="h-12 w-12 rounded-full border"
+                src={`http://localhost:8080${profileImage}`}
                 alt="Profile"
               />
             ) : (
@@ -246,6 +246,7 @@ export default function PostCard({ post }) {
         commentCount={commentCount}
         profileImage={profileImage}
         userEmail={currentUserEmail}
+        boardEmail={email}
       />
     </li>
   );

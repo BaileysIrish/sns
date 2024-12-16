@@ -5,6 +5,8 @@ import {
   toggleCommentLike,
   getCommentLikeStatus,
 } from "../../api/comments";
+import { getUserProfile } from "../../api/User";
+import { IoPersonCircle } from "react-icons/io5";
 
 export default function CommentTotal({ comment, userEmail, onReply }) {
   const [isCommentLiked, setIsCommentLiked] = useState(
@@ -13,6 +15,7 @@ export default function CommentTotal({ comment, userEmail, onReply }) {
   const [likeCount, setLikeCount] = useState(0);
 
   const [showReplies, setShowReplies] = useState(false); // 대댓글 표시 여부
+  const [profileImage, setProfileImage] = useState(null); // 댓글 작성자의 프로필 이미지
 
   // 좋아요 상태와 개수 가져오기
   useEffect(() => {
@@ -56,16 +59,39 @@ export default function CommentTotal({ comment, userEmail, onReply }) {
     }
   };
 
+  // 프로필 이미지 가져오기
+  useEffect(() => {
+    let isMounted = true; // 컴포넌트가 언마운트된 경우 fetch 취소
+    const fetchProfileImage = async () => {
+      try {
+        const userProfile = await getUserProfile(comment.authorEmail);
+        if (isMounted) {
+          setProfileImage(userProfile.profileImage);
+        }
+      } catch (error) {
+        console.error("프로필 이미지 가져오기 실패:", error);
+      }
+    };
+    fetchProfileImage();
+    return () => {
+      isMounted = false; // 언마운트 시 상태 업데이트 방지
+    };
+  }, [comment.authorEmail]);
+
   return (
     <div>
       <div className="flex items-center justify-between py-3 px-3">
         <div className="flex items-center">
           <div>
-            <img
-              className="w-9 h-9 rounded-full"
-              src="https://cdn.pixabay.com/photo/2024/10/17/22/56/tree-9129005_640.jpg"
-              alt=""
-            />
+            {profileImage ? (
+              <img
+                className="w-9 h-9 rounded-full"
+                src={`http://localhost:8080${profileImage}`}
+                alt=""
+              />
+            ) : (
+              <IoPersonCircle className="h-9 w-9 text-gray-500" />
+            )}
           </div>
           <div className="ml-3">
             <p>

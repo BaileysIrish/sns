@@ -43,6 +43,7 @@ export default function Signup() {
         formData.append("profileImage", values.profileImage);
       }
 
+      console.log(...formData); // FormData 확인
       // 회원가입 요청
       const response = await signup(formData);
       console.log("Signup successful:", response);

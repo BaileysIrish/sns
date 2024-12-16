@@ -5,7 +5,7 @@ import {
   DrawerContent,
   DrawerRoot,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   BsBookmark,
   BsBookmarkFill,
@@ -33,9 +33,19 @@ export default function CommentModal({
   commentCount,
   profileImage,
   userEmail,
+  boardEmail,
 }) {
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null); // 대댓글 대상
+  const inputRef = useRef(null); // 입력창에 포커스를 이동하기 위한 Ref
+
+  // 모달 창 열릴 때 입력창 초기화
+  useEffect(() => {
+    if (open) {
+      setNewComment(""); // 입력값 초기화
+      setReplyTo(null); // 대댓글 대상 초기화
+    }
+  }, [open]);
 
   // 댓글 가져오기
   useEffect(() => {
@@ -88,6 +98,14 @@ export default function CommentModal({
   const handleReply = (comment) => {
     setReplyTo(comment); // 대댓글 대상 설정
     setNewComment(`@${comment.authorEmail} `); // 입력창에 ID 자동 추가
+    // 상태 업데이트 후 포커스 이동
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        const length = inputRef.current.value.length;
+        inputRef.current.setSelectionRange(length, length); // 커서를 텍스트 끝으로 이동
+      }
+    }, 0);
   };
 
   return (
@@ -123,7 +141,7 @@ export default function CommentModal({
                     {profileImage ? (
                       <img
                         className="w-9 h-9 rounded-full"
-                        src={profileImage}
+                        src={`http://localhost:8080${profileImage}`}
                         alt="Profile"
                       />
                     ) : (
@@ -131,7 +149,7 @@ export default function CommentModal({
                     )}
                   </div>
                   <div className="ml-2">
-                    <p>{userEmail}</p>
+                    <p>{boardEmail}</p>
                   </div>
                 </div>
                 <BsThreeDots />
@@ -192,6 +210,7 @@ export default function CommentModal({
                   <div className="flex w-full items-center px-2 py-2">
                     <BsEmojiSmile className="mr-2 text-lg" />
                     <input
+                      ref={inputRef}
                       className="commentInputs"
                       type="text"
                       placeholder="댓글 달기..."

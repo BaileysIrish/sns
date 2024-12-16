@@ -64,11 +64,16 @@ public class UserController {
     }
 
     private String saveImage(MultipartFile file) throws IOException {
-        String filename = UUID.randomUUID() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String filename = UUID.randomUUID().toString() + extension; // 한글 제거
         Path filePath = Paths.get(uploadDir + File.separator + filename);
-        Files.copy(file.getInputStream(), filePath);
 
-        // 저장된 파일의 경로를 URL로 변환 (예시: http://localhost:8080/images/filename)
+        if (!Files.exists(Paths.get(uploadDir))) {
+            Files.createDirectories(Paths.get(uploadDir));
+        }
+
+        Files.copy(file.getInputStream(), filePath);
         return "/images/" + filename;
     }
 
@@ -114,6 +119,24 @@ public class UserController {
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> allUsers = userService.getAllUsers();
         return ResponseEntity.ok(allUsers);
+    }
+
+    // 특정 사용자의 프로필 정보 가져오기
+    @GetMapping("/{email}")
+    public ResponseEntity<?> getUserProfile(@PathVariable String email) {
+        try {
+            User user = userService.findUserByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("사용자를 찾을 수 없습니다.");
+            }
+
+            UserDto userDto = userService.convertToDto(user);
+            return ResponseEntity.ok(userDto); // 사용자 정보를 반환
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("사용자 정보를 가져오는 중 오류가 발생했습니다.");
+        }
     }
 
 
