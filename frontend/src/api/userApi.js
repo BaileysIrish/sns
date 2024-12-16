@@ -163,3 +163,25 @@ export const deleteStory = async (storyId) => {
     await axios.delete(`http://localhost:8080/api/stories/${storyId}`);
 };
 
+// 일정 조회
+export const getSchedulesByUser = async (email) => {
+    const response = await axios.get(`http://localhost:8080/api/schedules/${email}`);
+    return response.data;
+};
+
+// 일정 추가
+export const createSchedule = async (scheduleData) => {
+    const response = await axios.post("http://localhost:8080/api/schedules", scheduleData);
+    return response.data;
+};
+
+// 일정 수정
+export const updateSchedule = async (id, updatedData) => {
+    const response = await axios.put(`http://localhost:8080/api/schedules/${id}`, updatedData);
+    return response.data;
+};
+
+// 일정 삭제
+export const deleteSchedule = async (id) => {
+    await axios.delete(`http://localhost:8080/api/schedules/${id}`);
+};

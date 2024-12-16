@@ -7,7 +7,7 @@ import BoardList from './components/BoardList';
 import CreatePost from './components/CreatePost';
 import CreateStory from './components/CreateStory'; // 스토리 생성
 import StoryList from './components/StoryList'; // 스토리 목록
-
+import CalendarPage from './components/Calendar'; // 캘린더 페이지 추가
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,6 +29,8 @@ function App() {
                         <Route path="/create-story" element={<CreateStory userEmail={localStorage.getItem("userEmail")} />} />
                         <Route path="/stories" element={<StoryList userEmail={localStorage.getItem("userEmail")} />} />
 
+                        {/* 캘린더 페이지 추가 */}
+                        <Route path="/calendar" element={<CalendarPage />} />
                     </Routes>
                 ) : (
                     <>
