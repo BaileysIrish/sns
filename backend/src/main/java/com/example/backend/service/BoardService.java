@@ -133,6 +133,10 @@ public class BoardService {
         return boardFileDtos;
     }
 
+    public List<Board> getPostsByEmail(String email) {
+        return boardRepository.findByEmail(email);
+    }
+
 
 
 }

@@ -4,7 +4,7 @@ import { CgBookmark } from "react-icons/cg";
 import { PiUserRectangleLight } from "react-icons/pi";
 import ReqUserPostCard from "./ReqUserPostCard";
 
-export default function ReqUserPost() {
+export default function ReqUserPost({ posts, user }) {
   const [activeTab, setActiveTab] = useState("게시물");
   const tabs = [
     { tab: "게시물", icon: <AiOutlineTable /> },
@@ -27,11 +27,17 @@ export default function ReqUserPost() {
         ))}
       </div>
       <div>
-        <div className="flex flex-wrap">
-          {[1, 1, 1, 1, 1, 1].map((item) => (
-            <ReqUserPostCard />
-          ))}
-        </div>
+        {activeTab === "게시물" && (
+          <div className="flex flex-wrap">
+            {posts.map((post) => (
+              <ReqUserPostCard
+                key={post.boardNumber}
+                post={post}
+                profileImage={user.profileImage}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

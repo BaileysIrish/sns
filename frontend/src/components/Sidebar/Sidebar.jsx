@@ -29,7 +29,10 @@ export default function Sidebar() {
 
     switch (title) {
       case "프로필":
-        navigate("/username");
+        const userEmail = sessionStorage.getItem("userEmail"); // 로그인한 사용자의 email 가져오기
+        if (userEmail) {
+          navigate(`/profile/${userEmail}`);
+        }
         break;
       case "홈":
         navigate("/");

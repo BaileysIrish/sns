@@ -68,6 +68,30 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public User updateProfile(UserDto userDto) {
+        User user = userRepository.findByEmail(userDto.getEmail());
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 업데이트할 필드 설정
+        if (userDto.getNickname() != null) {
+            user.setNickname(userDto.getNickname());
+        }
+        if (userDto.getTelNumber() != null) {
+            user.setTelNumber(userDto.getTelNumber());
+        }
+        if (userDto.getProfileImage() != null) {
+            user.setProfileImage(userDto.getProfileImage());
+        }
+        if (userDto.getBio() != null) {
+            user.setBio(userDto.getBio());
+        }
+
+        // 업데이트된 사용자 저장 후 반환
+        return userRepository.save(user);
+    }
+
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }

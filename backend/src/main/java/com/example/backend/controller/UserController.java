@@ -156,5 +156,18 @@ public class UserController {
         }
     }
 
+    @PostMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UserDto userDto) {
+        try {
+            User updatedUser = userService.updateProfile(userDto);
+            return ResponseEntity.ok(userService.convertToDto(updatedUser));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("프로필 업데이트 중 오류가 발생했습니다.");
+        }
+    }
+
 
 }

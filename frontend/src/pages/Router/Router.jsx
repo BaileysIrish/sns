@@ -81,7 +81,7 @@ export default function Router() {
             <ScrollTop />
             <Routes>
               <Route path="/" element={<HomePage />}></Route>
-              <Route path="/username" element={<Profile />}></Route>
+              <Route path="/profile/:username" element={<Profile />}></Route>
               <Route path="/stories/:email" element={<StoryViewer />}></Route>
             </Routes>
           </div>

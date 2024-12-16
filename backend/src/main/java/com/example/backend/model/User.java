@@ -28,5 +28,10 @@ public class User {
 
     @Column(name = "profile_image", columnDefinition = "TEXT")
     private String profileImage;
+
+    @Column(name = "bio", length = 255) // 한 줄 소개 추가
+    private String bio;
+
+
 }
 

@@ -1,7 +1,9 @@
 import axios from "axios";
 
-export const getUserProfile = async (email) => {
-  const response = await axios.get(`http://localhost:8080/api/users/${email}`);
+export const getUserProfile = async (username) => {
+  const response = await axios.get(
+    `http://localhost:8080/api/users/${username}`
+  );
   return response.data;
 };
 
@@ -54,4 +56,15 @@ export const getUserStories = async (email) => {
     console.error("스토리 정보를 가져오는 중 오류:", error);
     throw error;
   }
+};
+
+export const updateUserProfile = async (profileData) => {
+  const response = await axios.post(
+    "http://localhost:8080/api/users/profile",
+    profileData,
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  return response.data;
 };

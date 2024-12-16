@@ -74,3 +74,19 @@ export const getFavoriteStatus = async (boardNumber, email) => {
     throw error;
   }
 };
+
+export const getMyPosts = async (email) => {
+  try {
+    const response = await axios.get(
+      "http://localhost:8080/api/board/my-posts",
+      {
+        params: { email },
+      }
+    );
+    console.log("API 응답 데이터:", response.data); // API 데이터 출력
+    return response.data;
+  } catch (error) {
+    console.error("API 호출 중 오류:", error);
+    throw error;
+  }
+};

@@ -206,5 +206,14 @@ public class BoardController {
         }
     }
 
+    @GetMapping("/my-posts")
+    public ResponseEntity<List<BoardDto>> getMyPosts(@RequestParam String email) {
+        List<Board> myBoards = boardService.getPostsByEmail(email);
+        List<BoardDto> boardDtos = myBoards.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(boardDtos);
+    }
+
 
 }

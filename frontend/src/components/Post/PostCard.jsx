@@ -15,6 +15,7 @@ import { createComment, getCommentsByBoardId } from "../../api/comments";
 import { getUserProfile } from "../../api/User";
 import EditPost from "./EditPost";
 import CreatePost from "./CreatePost";
+import { Navigate } from "react-router-dom";
 
 export default function PostCard({ post, onDeletePost }) {
   const { email, content, boardNumber, files } = post;
@@ -33,6 +34,10 @@ export default function PostCard({ post, onDeletePost }) {
   const [comments, setComments] = useState([]); // 댓글 상태 추가
 
   const currentUserEmail = sessionStorage.getItem("userEmail"); // 현재 사용자 이메일을 sessionStorage에서 가져오기
+
+  const handleProfileClick = () => {
+    Navigate(`/profile/${post.email}`); // 게시물 작성자의 프로필로 이동
+  };
 
   // 좋아요 및 댓글 초기화
   useEffect(() => {
@@ -158,6 +163,7 @@ export default function PostCard({ post, onDeletePost }) {
                 className="h-12 w-12 rounded-full border"
                 src={`http://localhost:8080${profileImage}`}
                 alt="Profile"
+                onClick={handleProfileClick}
               />
             ) : (
               <IoPersonCircle className="h-12 w-12 text-gray-500" />

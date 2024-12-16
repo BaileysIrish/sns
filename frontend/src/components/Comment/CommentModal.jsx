@@ -18,6 +18,7 @@ import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline, IoPersonCircle } from "react-icons/io5";
 import "./CommentModal.css";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
+import { getPostById } from "../../api/posts";
 
 export default function CommentModal({
   comments,
@@ -38,6 +39,23 @@ export default function CommentModal({
   const [newComment, setNewComment] = useState("");
   const [replyTo, setReplyTo] = useState(null); // 대댓글 대상
   const inputRef = useRef(null); // 입력창에 포커스를 이동하기 위한 Ref
+  const [boardDetails, setBoardDetails] = useState(null);
+
+  useEffect(() => {
+    if (!boardNumber || !open) return;
+
+    const fetchBoardDetails = async () => {
+      try {
+        const details = await getPostById(boardNumber);
+        console.log(details);
+        setBoardDetails(details); // 게시물 상세 정보 설정
+      } catch (error) {
+        console.error("게시물 정보 가져오기 실패:", error);
+      }
+    };
+
+    fetchBoardDetails();
+  }, [boardNumber, open]);
 
   // 모달 창 열릴 때 입력창 초기화
   useEffect(() => {
@@ -128,11 +146,21 @@ export default function CommentModal({
         <DrawerBody className="p-0">
           <div className="flex h-[93vh]">
             <div className="w-[96%] flex flex-col justify-center">
-              <img
-                className="h-full w-full object-cover block"
-                src="https://cdn.pixabay.com/photo/2023/12/13/14/01/woman-8446980_640.png"
-                alt=""
-              />
+              {boardDetails ? (
+                <>
+                  {boardDetails.files && boardDetails.files.length > 0 && (
+                    <img
+                      src={`${boardDetails.files[0]?.fileUrl || ""}`}
+                      alt="게시물 이미지"
+                    />
+                  )}
+                  {boardDetails.content && (
+                    <p className="text-lg">{boardDetails.content}</p> // 파일과 내용이 모두 있는 경우 내용을 추가로 표시
+                  )}
+                </>
+              ) : (
+                <img src="https://via.placeholder.com/150" alt="기본 이미지" />
+              )}
             </div>
             <div className="w-[55%] relative">
               <div className="flex justify-between items-center py-3 px-3">
