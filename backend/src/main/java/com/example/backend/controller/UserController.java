@@ -1,8 +1,10 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.BoardFileDto;
 import com.example.backend.dto.LoginRequest;
 import com.example.backend.dto.UserDto;
 import com.example.backend.model.User;
+import com.example.backend.service.BoardService;
 import com.example.backend.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,14 +28,15 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final BoardService boardService;
 
     @Value("${profile.image.upload-dir}")
     private String uploadDir;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, BoardService boardService) {
         this.userService = userService;
+        this.boardService = boardService;
     }
-
     @PostMapping("/signup")
     public ResponseEntity<String> signup(
             @RequestParam("email") String email,
@@ -136,6 +140,19 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("사용자 정보를 가져오는 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/{email}/stories")
+    public ResponseEntity<List<BoardFileDto>> getUserStories(@PathVariable String email) {
+        try {
+            List<BoardFileDto> userStories = boardService.getUserStoriesByEmail(email);
+            if (userStories.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+            }
+            return ResponseEntity.ok(userStories);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
 

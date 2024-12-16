@@ -1,14 +1,20 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.BoardFileDto;
 import com.example.backend.model.Board;
 import com.example.backend.model.BoardFile;
 import com.example.backend.repository.BoardRepository;
 import com.example.backend.repository.BoardFileRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -108,6 +114,23 @@ public class BoardService {
             }
             boardFileRepository.delete(file); // DB에서 파일 삭제
         }
+    }
+
+    public List<BoardFileDto> getUserStoriesByEmail(String email) {
+        List<Board> userBoards = boardRepository.findByEmail(email);
+        List<BoardFileDto> boardFileDtos = new ArrayList<>();
+
+        for (Board board : userBoards) {
+            for (BoardFile file : board.getFiles()) {
+                BoardFileDto dto = new BoardFileDto();
+                dto.setFilePath(file.getFilePath());
+                dto.setFileUrl(file.getFileUrl());
+                dto.setFileType(file.getFileType());
+                boardFileDtos.add(dto);
+            }
+        }
+
+        return boardFileDtos;
     }
 
 

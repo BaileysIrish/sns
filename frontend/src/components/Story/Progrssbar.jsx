@@ -4,20 +4,21 @@ import "./Progressbar.css";
 export default function Progrssbar({ idx, activeIdx, duration }) {
   const [progress, setProgress] = useState(0);
   const isActive = idx === activeIdx;
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prevProgress) => {
-        if (prevProgress < 100) {
-          return prevProgress + 1;
-        }
-        clearInterval(interval);
-        return prevProgress;
-      });
-    }, duration / 100);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [duration, activeIdx]);
+    if (isActive) {
+      setProgress(0); // 활성화 시 진행도 초기화
+      const interval = setInterval(() => {
+        setProgress((prevProgress) =>
+          prevProgress < 100 ? prevProgress + 1 : 100
+        );
+      }, duration / 100);
+
+      return () => clearInterval(interval); // 컴포넌트 언마운트 시 정리
+    } else {
+      setProgress(0); // 비활성화 시 초기화
+    }
+  }, [isActive, duration]);
 
   useEffect(() => {
     setProgress(0);

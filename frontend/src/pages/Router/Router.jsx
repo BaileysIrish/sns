@@ -7,6 +7,8 @@ import Profile from "../Profile/Profile";
 import Story from "../Story/Story";
 import { ScrollTop } from "./ScrollToTop";
 import Auth from "../Auth/Auth";
+import WeatherEffect from "../../components/WeatherEffect/WeatherEffect";
+import StoryViewer from "../../components/Story/StoryViewer";
 
 export default function Router() {
   const navigate = useNavigate();
@@ -54,6 +56,7 @@ export default function Router() {
 
   return (
     <div>
+      <WeatherEffect />
       {showAlert && (
         <Alert
           title="로그인이 필요합니다."
@@ -68,6 +71,7 @@ export default function Router() {
           보호된 페이지에 접근하려면 로그인이 필요합니다.
         </Alert>
       )}
+
       {location.pathname !== "/login" && location.pathname !== "/signup" ? (
         <div className="flex">
           <div className="w-[22%]">
@@ -78,7 +82,7 @@ export default function Router() {
             <Routes>
               <Route path="/" element={<HomePage />}></Route>
               <Route path="/username" element={<Profile />}></Route>
-              <Route path="/stories" element={<Story />}></Route>
+              <Route path="/stories/:email" element={<StoryViewer />}></Route>
             </Routes>
           </div>
         </div>
