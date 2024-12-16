@@ -52,8 +52,10 @@ public class BoardController {
         // 게시물 저장
         Board savedBoard = boardService.createPost(board);
 
-        // 파일 저장 및 게시물에 파일 정보 추가
-        saveFiles(files, savedBoard);
+        // 파일 저장 (files가 null일 때 안전하게 처리)
+        if (files != null && !files.isEmpty()) {
+            saveFiles(files, savedBoard);
+        }
 
         // DTO로 변환하여 응답
         BoardDto boardDto = convertToDto(savedBoard);
