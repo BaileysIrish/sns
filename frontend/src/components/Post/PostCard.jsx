@@ -15,10 +15,11 @@ import { createComment, getCommentsByBoardId } from "../../api/comments";
 import { getUserProfile } from "../../api/User";
 import EditPost from "./EditPost";
 import CreatePost from "./CreatePost";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function PostCard({ post, onDeletePost }) {
   const { email, content, boardNumber, files } = post;
+  const navigate = useNavigate();
 
   const [isEditOpen, setIsEditOpen] = useState(false); // EditPost Drawer 상태
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false); // CreatePost 상태
@@ -36,7 +37,7 @@ export default function PostCard({ post, onDeletePost }) {
   const currentUserEmail = sessionStorage.getItem("userEmail"); // 현재 사용자 이메일을 sessionStorage에서 가져오기
 
   const handleProfileClick = () => {
-    Navigate(`/profile/${post.email}`); // 게시물 작성자의 프로필로 이동
+    navigate(`/profile/${email}`); // `useNavigate`로 페이지 이동
   };
 
   // 좋아요 및 댓글 초기화
@@ -160,13 +161,16 @@ export default function PostCard({ post, onDeletePost }) {
           <div className="flex items-center">
             {profileImage ? (
               <img
-                className="h-12 w-12 rounded-full border"
+                className="h-12 w-12 rounded-full border cursor-pointer"
                 src={`http://localhost:8080${profileImage}`}
                 alt="Profile"
                 onClick={handleProfileClick}
               />
             ) : (
-              <IoPersonCircle className="h-12 w-12 text-gray-500" />
+              <IoPersonCircle
+                className="h-12 w-12 text-gray-500 cursor-pointer"
+                onClick={handleProfileClick}
+              />
             )}
             <div className="pl-2">
               <p className="font-thin text-sm">{email}</p>

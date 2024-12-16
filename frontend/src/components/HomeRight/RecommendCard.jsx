@@ -1,10 +1,20 @@
 import React from "react";
 import { IoPersonCircle } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 export default function RecommendCard({ user }) {
+  const navigate = useNavigate(); // useNavigate 훅 사용
+
+  const handleProfileClick = () => {
+    navigate(`/profile/${user.email}`); // 해당 사용자의 프로필 페이지로 이동
+  };
+
   return (
     <div className="flex justify-between items-center">
-      <div className="flex items-center">
+      <div
+        className="flex items-center cursor-pointer"
+        onClick={handleProfileClick}
+      >
         {user.profileImage ? (
           <img
             className="w-9 h-9 rounded-full"

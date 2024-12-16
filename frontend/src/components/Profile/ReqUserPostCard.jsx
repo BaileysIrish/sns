@@ -37,11 +37,23 @@ export default function ReqUserPostCard({ post, profileImage }) {
     <>
       <div className="p-2" onClick={() => setIsModalOpen(true)}>
         <div className="post w-60 h-60">
-          <img
-            className="cursor-pointer w-full h-full object-cover"
-            src={post.files?.[0]?.fileUrl || "https://via.placeholder.com/150"}
-            alt="게시물 이미지"
-          />
+          {post.files?.[0]?.fileUrl ? (
+            <img
+              className="cursor-pointer w-full h-full object-cover"
+              src={post.files[0].fileUrl}
+              alt="게시물 이미지"
+            />
+          ) : post.content ? (
+            <div className="flex items-center justify-center w-full h-full bg-gray-200">
+              <p className="text-center text-gray-600 px-4">{post.content}</p>
+            </div>
+          ) : (
+            <img
+              className="cursor-pointer w-full h-full object-cover"
+              src="https://via.placeholder.com/150"
+              alt="기본 이미지"
+            />
+          )}
           <div className="overlay absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white">
             <div className="overlay-text flex space-x-4">
               <div className="flex items-center">
