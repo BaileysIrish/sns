@@ -19,6 +19,14 @@ export default function HomePage() {
 
     fetchPosts();
   }, []);
+
+  // 게시물 삭제 처리 함수
+  const handleDeletePost = (boardNumber) => {
+    setPosts((prevPosts) =>
+      prevPosts.filter((post) => post.boardNumber !== boardNumber)
+    );
+  };
+
   return (
     <div>
       <div className="mt-10 flex w-[100%] justify-center py-4 px-5">
@@ -30,7 +38,11 @@ export default function HomePage() {
           </div>
           <ul className="space-y-10 w-full mt-10">
             {posts?.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard
+                key={post.id}
+                post={post}
+                onDeletePost={handleDeletePost}
+              />
             ))}
           </ul>
         </div>

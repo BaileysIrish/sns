@@ -83,7 +83,8 @@ public class BoardController {
     public ResponseEntity<BoardDto> updatePost(
             @PathVariable int boardNumber,
             @RequestParam("content") String content,
-            @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "removeExistingFile", required = false) boolean removeExistingFile) {
 
         // 게시물 수정
         Board board = new Board();
@@ -92,8 +93,11 @@ public class BoardController {
 
         Board updatedBoard = boardService.updatePost(board);
 
-        // 파일 처리
-        if (files != null && !files.isEmpty()) {
+        if (removeExistingFile) {
+            // 기존 파일 삭제 요청 처리
+            boardService.deleteFilesByBoardNumber(boardNumber);
+        } else if (files != null && !files.isEmpty()) {
+            // 새 파일 저장
             saveFiles(files, updatedBoard);
         }
 

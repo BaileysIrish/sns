@@ -6,6 +6,7 @@ import com.example.backend.repository.BoardRepository;
 import com.example.backend.repository.BoardFileRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +96,18 @@ public class BoardService {
         Board board = boardRepository.findById(boardNumber)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다."));
         return board.getFavoriteUsers().contains(email);
+    }
+
+    // 파일 삭제
+    public void deleteFilesByBoardNumber(int boardNumber) {
+        List<BoardFile> files = boardFileRepository.findByBoard_BoardNumber(boardNumber);
+        for (BoardFile file : files) {
+            File fileOnDisk = new File(file.getFilePath());
+            if (fileOnDisk.exists()) {
+                fileOnDisk.delete(); // 디스크에서 파일 삭제
+            }
+            boardFileRepository.delete(file); // DB에서 파일 삭제
+        }
     }
 
 

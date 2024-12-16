@@ -10,13 +10,19 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline, IoPersonCircle } from "react-icons/io5";
 import CommentModal from "../Comment/CommentModal";
-import { toggleFavorite, getFavoriteStatus } from "../../api/posts";
+import { toggleFavorite, getFavoriteStatus, deletePost } from "../../api/posts";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
 import { getUserProfile } from "../../api/User";
+import EditPost from "./EditPost";
+import CreatePost from "./CreatePost";
 
-export default function PostCard({ post }) {
-  const { title, email, content, boardNumber, files } = post;
-  const [showDropDown, setShowDropDown] = useState(false);
+export default function PostCard({ post, onDeletePost }) {
+  const { email, content, boardNumber, files } = post;
+
+  const [isEditOpen, setIsEditOpen] = useState(false); // EditPost Drawer 상태
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false); // CreatePost 상태
+  const [postDetails, setPostDetails] = useState({}); // 게시물 정보 상태
+
   const [isPostLiked, setIsPostLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
@@ -25,8 +31,8 @@ export default function PostCard({ post }) {
   const [newComment, setNewComment] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const [comments, setComments] = useState([]); // 댓글 상태 추가
-  // 현재 사용자 이메일을 sessionStorage에서 가져오기
-  const currentUserEmail = sessionStorage.getItem("userEmail");
+
+  const currentUserEmail = sessionStorage.getItem("userEmail"); // 현재 사용자 이메일을 sessionStorage에서 가져오기
 
   // 좋아요 및 댓글 초기화
   useEffect(() => {
@@ -120,8 +126,27 @@ export default function PostCard({ post }) {
     }
   };
 
-  const handleClick = () => {
-    setShowDropDown(!showDropDown);
+  const handleEditClick = () => {
+    setPostDetails({ boardNumber, content, files }); // 수정할 게시물 정보 저장
+    setIsCreatePostOpen(true); // 수정 모드로 CreatePost 열기
+    setIsEditOpen(false); // EditPost 닫기
+  };
+
+  const handleUnfollow = () => {
+    alert("팔로우를 취소했습니다.");
+    setIsEditOpen(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deletePost(boardNumber); // API 호출로 게시물 삭제
+      alert("게시물이 삭제되었습니다.");
+      onDeletePost(boardNumber); // 부모 컴포넌트로 삭제 알림
+      setIsEditOpen(false); // EditPost 닫기
+    } catch (error) {
+      console.error("게시물 삭제 실패:", error);
+      alert("게시물 삭제 중 오류가 발생했습니다.");
+    }
   };
   return (
     <li key={boardNumber}>
@@ -142,14 +167,10 @@ export default function PostCard({ post }) {
             </div>
           </div>
           <div>
-            <BsThreeDots className="dots" onClick={handleClick} />
-            <div className="dropdown-content">
-              {showDropDown && (
-                <p className="bg-black text-white py-1 px-4 rounded-md cursor-pointer">
-                  삭제
-                </p>
-              )}
-            </div>
+            <BsThreeDots
+              className="cursor-pointer"
+              onClick={() => setIsEditOpen(true)}
+            />
           </div>
         </div>
         <div className="w-full">
@@ -247,6 +268,21 @@ export default function PostCard({ post }) {
         profileImage={profileImage}
         userEmail={currentUserEmail}
         boardEmail={email}
+      />
+      <EditPost
+        onUnfollow={handleUnfollow}
+        onDelete={handleDelete}
+        open={isEditOpen}
+        setOpen={setIsEditOpen}
+        onEdit={handleEditClick} // 수정 버튼 클릭 핸들러
+        currentUserEmail={currentUserEmail} // 현재 로그인한 사용자 이메일 전달
+        postEmail={email} // 게시물 작성자 이메일 전달
+      />
+      <CreatePost
+        open={isCreatePostOpen}
+        setOpen={setIsCreatePostOpen}
+        initialPost={postDetails}
+        isEditMode={true}
       />
     </li>
   );

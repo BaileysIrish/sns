@@ -6,21 +6,40 @@ import {
   DrawerContent,
   DrawerRoot,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TbPhotoVideo } from "react-icons/tb";
 import { GrEmoji } from "react-icons/gr";
 import { GoLocation } from "react-icons/go";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import "./CreatePost.css";
 import AlertDelete from "./AlertDelete";
-import { createPost } from "../../api/posts";
+import { createPost, updatePost } from "../../api/posts";
 
-export default function CreatePost({ open, setOpen }) {
+export default function CreatePost({ open, setOpen, initialPost, isEditMode }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [isClosingDrawer, setIsClosingDrawer] = useState(false);
+  const [originalFile, setOriginalFile] = useState(null); // 수정 전 파일
+  const [originalCaption, setOriginalCaption] = useState(""); // 수정 전 캡션
+  const [trigger, setTrigger] = useState(null); // 기본값: 수정 취소
+
+  // 수정 모드에서 초기 데이터 설정
+  useEffect(() => {
+    if (isEditMode && initialPost) {
+      setCaption(initialPost.content || "");
+      setOriginalCaption(initialPost.content || ""); // 수정 전 캡션 저장
+      if (initialPost.files?.length > 0) {
+        const initialFile = {
+          url: initialPost.files[0].fileUrl,
+          type: initialPost.files[0].fileType,
+        };
+        setFile(initialFile);
+        setOriginalFile(initialFile); // 수정 전 파일 저장
+      }
+    }
+  }, [initialPost, isEditMode, open]);
 
   const handleSharePost = async () => {
     if (!file && !caption) {
@@ -31,25 +50,43 @@ export default function CreatePost({ open, setOpen }) {
 
     const formData = new FormData();
     formData.append("content", caption);
-    formData.append("email", userEmail); // 사용자의 이메일
+    formData.append("email", userEmail);
 
-    if (file) {
+    if (file instanceof File) {
+      // 새 파일이 추가된 경우
       formData.append("files", file);
-    } else {
-      formData.append("files", new Blob()); // 빈 파일 추가
+    } else if (file === null && originalFile) {
+      // 기존 파일 삭제 요청
+      formData.append("removeExistingFile", "true");
+    } else if (file === null && !originalFile) {
+      // 파일이 처음부터 없었음 (새로운 파일 추가 없음)
+      formData.append("keepExistingFiles", "true");
     }
 
     try {
-      const response = await createPost(formData);
-      alert("게시물이 성공적으로 업로드되었습니다!");
-      console.log("업로드된 게시물:", response);
+      if (isEditMode && initialPost?.boardNumber) {
+        // 수정 모드일 경우
+        await updatePost(initialPost.boardNumber, formData);
+        alert("게시물이 수정되었습니다!");
+      } else {
+        // 새 게시물 생성
+        await createPost(formData);
+        alert("게시물이 성공적으로 업로드되었습니다!");
+      }
       setFile(null);
       setCaption("");
-      setOpen(false); // 드로어 닫기
+      setOpen(false);
     } catch (error) {
-      console.error("게시물 업로드 중 오류 발생:", error);
-      alert("게시물 업로드 중 오류가 발생했습니다.");
+      console.error("게시물 저장 중 오류 발생:", error);
+      alert("게시물 저장 중 오류가 발생했습니다.");
     }
+  };
+
+  const handleRevertChanges = () => {
+    setCaption(originalCaption); // 원래 캡션으로 복구
+    setFile(originalFile); // 원래 파일로 복구
+    setShowAlert(false); // 알림 닫기
+    setOpen(false); // Drawer 닫기
   };
 
   const handleDrop = (e) => {
@@ -89,7 +126,8 @@ export default function CreatePost({ open, setOpen }) {
 
   const handleDrawer = (e) => {
     if (!e.open) {
-      if (file !== null || caption !== "") {
+      if (file !== originalFile || caption !== originalCaption) {
+        setTrigger("cancelEdit");
         setShowAlert(true);
         setIsClosingDrawer(true);
       } else {
@@ -118,6 +156,7 @@ export default function CreatePost({ open, setOpen }) {
   };
 
   const handleBackArrow = () => {
+    setTrigger("backArrow"); // 뒤로가기 클릭
     setShowAlert(true);
     setIsClosingDrawer(false);
   };
@@ -145,7 +184,9 @@ export default function CreatePost({ open, setOpen }) {
               className="text-4xl cursor-pointer"
               onClick={handleBackArrow}
             />
-            <p className="font-semibold">새 게시물 만들기</p>
+            <p className="font-semibold">
+              {isEditMode ? "게시물 수정하기" : "새 게시물 만들기"}
+            </p>
             <Button
               className="outline-none border-none"
               variant={"ghost"}
@@ -153,7 +194,7 @@ export default function CreatePost({ open, setOpen }) {
               colorScheme={"blue"}
               onClick={handleSharePost}
             >
-              공유하기
+              {isEditMode ? "수정하기" : "공유하기"}
             </Button>
           </div>
           <hr />
@@ -184,19 +225,31 @@ export default function CreatePost({ open, setOpen }) {
                   </div>
                 )}
                 {file &&
-                  (file.type.startsWith("video/") ? (
-                    <video
-                      className="h-full w-full"
-                      src={URL.createObjectURL(file)}
-                      controls
-                    />
-                  ) : (
-                    <img
-                      className="h-full w-full"
-                      src={URL.createObjectURL(file)}
-                      alt=""
-                    />
-                  ))}
+                  (file instanceof File ? ( // 새로 업로드된 파일인 경우
+                    file.type.startsWith("video/") ? (
+                      <video
+                        className="h-full w-full"
+                        src={URL.createObjectURL(file)} // File 객체로 URL 생성
+                        controls
+                      />
+                    ) : (
+                      <img
+                        className="h-full w-full"
+                        src={URL.createObjectURL(file)} // File 객체로 URL 생성
+                        alt=""
+                      />
+                    )
+                  ) : file.url ? ( // 기존 URL인 경우
+                    file.type.startsWith("video/") ? (
+                      <video
+                        className="h-full w-full"
+                        src={file.url}
+                        controls
+                      />
+                    ) : (
+                      <img className="h-full w-full" src={file.url} alt="" />
+                    )
+                  ) : null)}
               </div>
               <div className="w-[1px] border h-full"></div>
               <div className="w-[50%]">
@@ -214,6 +267,7 @@ export default function CreatePost({ open, setOpen }) {
                     className="captionInput"
                     name="caption"
                     rows="8"
+                    value={caption}
                     onChange={handleCaptionChange}
                   ></textarea>
                 </div>
@@ -246,6 +300,9 @@ export default function CreatePost({ open, setOpen }) {
         onDelete={handleDelete}
         open={showAlert}
         setOpen={setShowAlert}
+        onEdit={handleRevertChanges}
+        trigger={trigger}
+        isEditMode={isEditMode}
       />
     </div>
   );
