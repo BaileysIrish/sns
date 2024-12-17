@@ -28,26 +28,6 @@ export const sidebarMenu = [
     activeIcon: <IoSearchSharp className="text-2xl mr-5" />,
   },
   {
-    title: "탐색 탭",
-    icon: <IoCompassOutline className="text-2xl mr-5" />,
-    activeIcon: <IoCompass className="text-2xl mr-5" />,
-  },
-  {
-    title: "릴스",
-    icon: <BiMoviePlay className="text-2xl mr-5" />,
-    activeIcon: <BiSolidMoviePlay className="text-2xl mr-5" />,
-  },
-  {
-    title: "메시지",
-    icon: <IoPaperPlaneOutline className="text-2xl mr-5" />,
-    activeIcon: <IoPaperPlaneSharp className="text-2xl mr-5" />,
-  },
-  {
-    title: "알림",
-    icon: <AiOutlineHeart className="text-2xl mr-5" />,
-    activeIcon: <AiFillHeart className="text-2xl mr-5" />,
-  },
-  {
     title: "만들기",
     icon: <LuPlusSquare className="text-2xl mr-5" />,
     activeIcon: <LuPlusSquare className="text-2xl mr-5" />,
