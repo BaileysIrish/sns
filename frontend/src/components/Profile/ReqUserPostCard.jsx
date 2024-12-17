@@ -15,6 +15,10 @@ export default function ReqUserPostCard({ post, profileImage }) {
 
   useEffect(() => {
     const fetchCountsAndComments = async () => {
+      if (!post.boardNumber || !post.email) {
+        console.warn("Invalid post data:", post);
+        return; // boardNumber나 email이 없으면 API 호출 중단
+      }
       try {
         const { favoriteCount } = await getFavoriteStatus(
           post.boardNumber,
@@ -32,6 +36,7 @@ export default function ReqUserPostCard({ post, profileImage }) {
 
     fetchCountsAndComments();
   }, [post.boardNumber, post.email]);
+  console.log("Post 데이터:", post);
 
   return (
     <>

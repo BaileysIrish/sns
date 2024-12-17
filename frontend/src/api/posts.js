@@ -90,3 +90,43 @@ export const getMyPosts = async (email) => {
     throw error;
   }
 };
+
+export const savePost = async (postData) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/api/saved-posts/save",
+      postData,
+      {
+        headers: {
+          "Content-Type": "application/json", // multipart-form-data로 바꾸기 전 확인 필요
+        },
+      }
+    );
+    console.log("저장된 게시물:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("게시물 저장 실패:", error);
+    throw error;
+  }
+};
+export const getSavedPosts = async (userId) => {
+  const encodedUserId = encodeURIComponent(userId); // userId를 URL-safe하게 인코딩
+  return await axios.get(
+    `http://localhost:8080/api/saved-posts/${encodedUserId}`
+  );
+};
+export const checkIfPostSaved = async (userId, content) => {
+  const response = await axios.get(
+    "http://localhost:8080/api/saved-posts/is-saved",
+    {
+      params: { userId, content },
+    }
+  );
+  return response.data; // true 또는 false 반환
+};
+
+export const deleteSavedPost = async (userId, content) => {
+  return await axios.delete("http://localhost:8080/api/saved-posts/delete", {
+    params: { userId, content },
+  });
+};

@@ -92,6 +92,7 @@ public class BoardService {
 
     // 좋아요 개수 가져오기
     public int getFavoriteCount(int boardNumber) {
+        System.out.println("getFavoriteCount 호출 - boardNumber: " + boardNumber);
         Board board = boardRepository.findById(boardNumber)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다."));
         return board.getFavoriteCount();
@@ -99,6 +100,7 @@ public class BoardService {
 
     // 특정 사용자의 좋아요 상태 확인
     public boolean isPostLikedByUser(int boardNumber, String email) {
+        System.out.println("isPostLikedByUser 호출 - boardNumber: " + boardNumber + ", email: " + email);
         Board board = boardRepository.findById(boardNumber)
                 .orElseThrow(() -> new IllegalArgumentException("게시물이 존재하지 않습니다."));
         return board.getFavoriteUsers().contains(email);

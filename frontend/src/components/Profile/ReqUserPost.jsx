@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlineTable } from "react-icons/ai";
 import { CgBookmark } from "react-icons/cg";
 import { PiUserRectangleLight } from "react-icons/pi";
 import ReqUserPostCard from "./ReqUserPostCard";
+import { getMyPosts, getSavedPosts } from "../../api/posts";
 
-export default function ReqUserPost({ posts, user }) {
+export default function ReqUserPost({ posts, savedPosts, user }) {
   const [activeTab, setActiveTab] = useState("게시물");
+
   const tabs = [
     { tab: "게시물", icon: <AiOutlineTable /> },
     { tab: "저장됨", icon: <CgBookmark /> },
@@ -30,6 +32,17 @@ export default function ReqUserPost({ posts, user }) {
         {activeTab === "게시물" && (
           <div className="flex flex-wrap">
             {posts.map((post) => (
+              <ReqUserPostCard
+                key={post.boardNumber}
+                post={post}
+                profileImage={user.profileImage}
+              />
+            ))}
+          </div>
+        )}
+        {activeTab === "저장됨" && (
+          <div className="flex flex-wrap">
+            {savedPosts.map((post) => (
               <ReqUserPostCard
                 key={post.boardNumber}
                 post={post}

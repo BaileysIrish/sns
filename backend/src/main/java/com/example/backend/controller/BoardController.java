@@ -192,14 +192,17 @@ public class BoardController {
             @PathVariable int boardNumber,
             @RequestParam String email) {
         try {
-            boolean isLiked = boardService.isPostLikedByUser(boardNumber, email); // 특정 사용자 상태 확인
-            int favoriteCount = boardService.getFavoriteCount(boardNumber); // 좋아요 개수
+            Board board = boardService.getPostById(boardNumber); // 게시물 찾기
+            if (board == null) {
+                return ResponseEntity.notFound().build(); // 게시물이 없으면 404 반환
+            }
+            boolean isLiked = boardService.isPostLikedByUser(boardNumber, email);
+            int favoriteCount = boardService.getFavoriteCount(boardNumber);
 
             Map<String, Object> response = Map.of(
                     "isLiked", isLiked,
                     "favoriteCount", favoriteCount
             );
-
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to retrieve favorite status"));

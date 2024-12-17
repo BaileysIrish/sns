@@ -10,7 +10,15 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
 import { IoPaperPlaneOutline, IoPersonCircle } from "react-icons/io5";
 import CommentModal from "../Comment/CommentModal";
-import { toggleFavorite, getFavoriteStatus, deletePost } from "../../api/posts";
+import {
+  toggleFavorite,
+  getFavoriteStatus,
+  deletePost,
+  savePost,
+  checkIfPostSaved,
+  deleteSavedPost,
+  getSavedPosts,
+} from "../../api/posts";
 import { createComment, getCommentsByBoardId } from "../../api/comments";
 import { getUserProfile } from "../../api/User";
 import EditPost from "./EditPost";
@@ -35,6 +43,20 @@ export default function PostCard({ post, onDeletePost }) {
   const [comments, setComments] = useState([]); // 댓글 상태 추가
 
   const currentUserEmail = sessionStorage.getItem("userEmail"); // 현재 사용자 이메일을 sessionStorage에서 가져오기
+
+  // 저장 여부 확인
+  useEffect(() => {
+    const fetchSavedStatus = async () => {
+      try {
+        const savedStatus = await checkIfPostSaved(currentUserEmail, content);
+        setIsSaved(savedStatus);
+      } catch (error) {
+        console.error("저장 상태 확인 중 오류:", error);
+      }
+    };
+
+    fetchSavedStatus();
+  }, [currentUserEmail, content]);
 
   const handleProfileClick = () => {
     navigate(`/profile/${email}`); // `useNavigate`로 페이지 이동
@@ -86,8 +108,44 @@ export default function PostCard({ post, onDeletePost }) {
     };
   }, [email]);
 
-  const handleSavePost = () => {
-    setIsSaved(!isSaved);
+  const handleSavePost = async () => {
+    try {
+      // 게시물에 파일이 존재하는 경우 첫 번째 파일 URL과 타입 가져오기
+      const filePath =
+        post.files && post.files.length > 0 ? post.files[0].fileUrl : null;
+      const fileType =
+        post.files && post.files.length > 0 ? post.files[0].fileType : null;
+
+      const savedPost = {
+        userId: currentUserEmail, // 저장하는 사용자 ID
+        authorId: email, // 게시물 작성자 ID
+        content: content, // 게시물 내용
+        filePath: filePath, // 파일 경로
+        fileType: fileType, // 파일 타입
+        boardNumber: boardNumber, // 게시물의 고유 번호 추가
+      };
+
+      // 중복 저장 여부 확인 (서버에 체크를 요청)
+      const isSaved = await checkIfPostSaved(currentUserEmail, content);
+      if (isSaved) {
+        await deleteSavedPost(currentUserEmail, content);
+        setIsSaved(false);
+        return; // 중복된 게시물이면 저장하지 않음
+      }
+
+      // 중복되지 않으면 저장
+      const response = await savePost(savedPost); // savePost 호출 시 응답 확인
+      if (response) {
+        setIsSaved(true);
+        console.log("저장된 게시물:", response.data);
+        alert("게시물이 저장되었습니다!");
+      } else {
+        alert("게시물을 저장하는 데 실패했습니다. 서버 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      console.error("게시물 저장 실패:", error);
+      alert("게시물 저장 중 오류가 발생했습니다.");
+    }
   };
 
   const handlePostLike = async () => {
